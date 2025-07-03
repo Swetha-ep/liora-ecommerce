@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from products.models import Product,Categories
+from .forms import CategoryForm
 
 # Create your views here.
 # dashboard view
@@ -18,7 +19,13 @@ def products_list(request):
 
 # add product view
 def add_products(request):
-    return render(request,'items/add_products.html')
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+    else:
+        form = CategoryForm()
+    return render(request,'items/add_products.html',{'form':form})
 
 
 # --------------------------category views-----------------------------
@@ -33,4 +40,11 @@ def category_list(request):
 
 # add category view
 def add_category(request):
-    return render(request,'items/add_category.html')
+    if request.method == 'POST':
+        form = CategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('category_list')
+    else:
+        form = CategoryForm()
+    return render(request,'items/add_category.html',{'form':form})
