@@ -44,34 +44,24 @@
                       >
                         <thead>
                           <tr>
-                            <th>Image</th>
                             <th>Name</th>
-                            <th>Price</th>
-                            <th>Category</th>
+                            <th>Image</th>
                             <th style="width: 10%">Action</th>
                           </tr>
                         </thead>
                         <!--looping through products and displaying as list-->
-                        {% for item in products%}
+                        {% for item in categories%}
                         <tbody>
                           <tr>
-                            <td>
-                              {% with item.inventories.first as inventory_item %}
-                                {% if inventory_item and inventory_item.image %}
-                                <div class="avatar avatar-xxl">
-                                  <img src="{{ inventory_item.image.url }}" alt="..." class="avatar-img rounded-circle">
-                                </div>
-                                {% else %}
-                                  <p>No image available</p>
-                                {% endif %}
-                              {% endwith %}
-                            </td>
                             <td>{{item.name}}</td>
-                            <td>{{item.price}}</td>
-                            <td>{{item.category.name}}</td>
+                            <td>
+                              <div class="avatar avatar-xxl">
+                                <img src="{{item.image.url}}" alt="..." class="avatar-img rounded-circle">
+                              </div>
+                            </td>
                             <td>
                               <div class="form-button-action">
-                                <a href="{% url 'add_products' %}">
+                                <a href="{% url 'add_category' %}">
                                   <button
                                     type="button"
                                     data-bs-toggle="tooltip"
