@@ -38,6 +38,16 @@
                     <form method="POST" enctype="multipart/form-data">
                       {% csrf_token %}
                       {{ form.as_p }}
+                      {% if form.instance and form.instance.image %}
+                        <div>
+                            <p>Current Image:</p>
+                            <img id="image-preview" src="{{ form.instance.image.url }}" alt="Current Image" style="max-height: 200px; margin-bottom: 10px;">
+                        </div>
+                      {% else %}
+                        <div>
+                            <img id="image-preview" src="#" alt="Image Preview" style="display: none; max-height: 200px; margin-bottom: 10px;">
+                        </div>
+                      {% endif %}
                       <div class="card-action">
                         <button class="btn btn-success" type= "submit">Submit</button>
                       </div>
@@ -51,4 +61,25 @@
             </div>
           </div>
         </div>
+
+        <script>
+          function previewImage(event) {
+              const input = event.target;
+              const preview = document.getElementById('image-preview');
+
+              if (input.files && input.files[0]) {
+                  const reader = new FileReader();
+
+                  reader.onload = function(e) {
+                      preview.src = e.target.result;
+                      preview.style.display = 'block';
+                  }
+
+                  reader.readAsDataURL(input.files[0]);
+              } else {
+                  preview.src = '#';
+                  preview.style.display = 'none';
+              }
+          }
+        </script>
   {% endblock admin_content %}

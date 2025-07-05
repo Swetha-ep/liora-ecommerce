@@ -61,7 +61,7 @@
                             </td>
                             <td>
                               <div class="form-button-action">
-                                <a href="{% url 'add_category' %}">
+                                <a href="{% url 'edit_category' item.id %}">
                                   <button
                                     type="button"
                                     data-bs-toggle="tooltip"
@@ -72,15 +72,17 @@
                                     <i class="fa fa-edit"></i>
                                   </button>
                                 </a>
-                                <button
-                                  type="button"
-                                  data-bs-toggle="tooltip"
-                                  title=""
-                                  class="btn btn-link btn-danger"
-                                  data-original-title="Remove"
-                                >
-                                  <i class="fa fa-times"></i>
-                                </button>
+                                <a href="{% url 'delete_category' item.id %}">
+                                  <button
+                                    type="button"
+                                    data-bs-toggle="tooltip"
+                                    title=""
+                                    class="btn btn-link btn-danger"
+                                    data-original-title="Remove"
+                                  >
+                                    <i class="fa fa-times"></i>
+                                  </button>
+                              </a>
                               </div>
                             </td>
                           </tr>

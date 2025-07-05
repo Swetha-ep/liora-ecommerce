@@ -8,5 +8,5 @@ class CategoryForm(ModelForm):
         fields = ['name', 'image']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter category name'}),
-            'image': forms.ClearableFileInput(attrs={'class': 'form-control-file'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control-file', 'onchange': 'previewImage(event)'}),
         }
