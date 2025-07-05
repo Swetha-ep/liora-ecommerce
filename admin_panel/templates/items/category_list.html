@@ -35,8 +35,6 @@
                     </div>
                   </div>
                   <div class="card-body">
-                    <!-- Modal -->
-                    
                     <div class="table-responsive">
                       <table
                         id="add-row"
@@ -72,24 +70,47 @@
                                     <i class="fa fa-edit"></i>
                                   </button>
                                 </a>
-                                <a href="{% url 'delete_category' item.id %}">
-                                  <button
-                                    type="button"
-                                    data-bs-toggle="tooltip"
-                                    title=""
-                                    class="btn btn-link btn-danger"
-                                    data-original-title="Remove"
-                                  >
-                                    <i class="fa fa-times"></i>
-                                  </button>
-                              </a>
+                                <button
+                                  type="button"
+                                  data-bs-toggle="modal"
+                                  title=""
+                                  class="btn btn-link btn-danger"
+                                  data-original-title="Remove"
+                                  data-bs-target="#deleteModal{{ item.id }}"
+                                >
+                                  <i class="fa fa-times"></i>
+                                </button>
                               </div>
                             </td>
                           </tr>
                         </tbody>
+                        <!-- Modal -->
+                        <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ item.id }}" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <form method="post" action="{% url 'delete_category' item.id %}">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="deleteModalLabel{{ item.id }}">Confirm Delete</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                    <i class="fa fa-times"></i>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  Are you sure you want to delete "{{ item.name }}"?
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="submit" class="btn btn-danger">Delete</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        <!--end of modal-->
                         {% endfor %}
                         <!--end of loop-->
                       </table>
+
                     </div>
                   </div>
                 </div>
