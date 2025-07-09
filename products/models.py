@@ -45,12 +45,12 @@ class Color(models.Model):
 class Size(models.Model):
     name = models.CharField(max_length=10)
 
-    def __str__(self):
+    def __str__(self):  
         return self.name
     
 
 class Inventory(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='inventories')
     color = models.ForeignKey(Color, on_delete=models.CASCADE)
     size = models.ForeignKey(Size, on_delete=models.CASCADE)
     stock = models.PositiveIntegerField(default=0)
@@ -60,4 +60,4 @@ class Inventory(models.Model):
         unique_together = ('product','color','size')
     
     def __str__(self):
-        return f"{self.product.name} -{self.color.name} - {self.size.name}"
+        return f"{self.product.name} - {self.color.name} - {self.size.name}"

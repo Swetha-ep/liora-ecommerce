@@ -1,0 +1,109 @@
+{% extends "admin/admin_layout.html" %}
+  {% load static %}
+  {% block title %}L I O R A | Size List{% endblock %}
+  {% block admin_content %} 
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Inventory</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Inventory</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">{{heading}} List</a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      <h4 class="card-title">{{heading}} List</h4>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <div class="table-responsive">
+                      <table
+                        id="add-row"
+                        class="display table table-striped table-hover"
+                      >
+                        <thead>
+                          <tr>
+                            <th>No.</th>
+                            <th>{{heading}}</th>
+                            <th style="width: 10%">Action</th>
+                          </tr>
+                        </thead>
+                        <!--looping through data and displaying as list-->
+                        {% for item in property%}
+                        <tbody>
+                          <tr>
+                            <td>{{forloop.counter}}</td>
+                            <td>
+                              {{item.name}}
+                            </td>
+                            <td>
+                              <div class="form-button-action">
+                                <button
+                                  type="button"
+                                  data-bs-toggle="modal"
+                                  title=""
+                                  class="btn btn-link btn-danger"
+                                  data-original-title="Remove"
+                                  data-bs-target="#deleteModal{{ item.id }}"
+                                >
+                                  <i class="fa fa-times"></i>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                        <!-- Modal -->
+                        <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ item.id }}" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <form method="post" action="{% url delete_url_name item.id %}">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="deleteModalLabel{{ item.id }}">Confirm Delete</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                    <i class="fa fa-times"></i>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  Are you sure you want to delete "{{ item.name }}"?
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="submit" class="btn btn-danger">Delete</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        <!--end of modal-->
+                        {% endfor %}
+                        <!--end of loop-->
+                      </table>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+  {% endblock admin_content %}
