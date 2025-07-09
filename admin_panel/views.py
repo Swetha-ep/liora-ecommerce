@@ -92,9 +92,33 @@ class SizeList(ListView):
     template_name = 'inventory/property_list.html'
     context_object_name = 'property'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['delete_url_name'] = 'size_delete'
+        context['heading'] = 'Size'
+        return context
+
 class SizeDelete(DeleteView):
     model = Size
     success_url =reverse_lazy('size_list')
 
 
+# --------------------------color views-----------------------------
+class ColorList(ListView):
+    model = Color
+    template_name = 'inventory/property_list.html'
+    context_object_name = 'property'
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['delete_url_name'] = 'color_delete'
+        context['heading'] = 'Color'
+        return context
+    
 
+class ColorDelete(DeleteView):
+    model = Color
+    success_url =reverse_lazy('color_list')
+
+
+# --------------------------inventory views-----------------------------

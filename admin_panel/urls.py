@@ -15,5 +15,8 @@ urlpatterns = [
     path('delete_category/<pk>/', views.CategoryDelete.as_view(), name='delete_category'),
 
     path('size_list/', views.SizeList.as_view(), name='size_list'),
-    path('size_delete/', views.SizeDelete.as_view(), name='size_delete'),
+    path('size_delete/<pk>/', views.SizeDelete.as_view(), name='size_delete'),
+
+    path('color_list/', views.ColorList.as_view(), name='color_list'),
+    path('color_delete/<pk>/', views.ColorDelete.as_view(), name='color_delete'),
 ]

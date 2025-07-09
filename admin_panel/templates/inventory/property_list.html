@@ -22,7 +22,7 @@
                   <i class="icon-arrow-right"></i>
                 </li>
                 <li class="nav-item">
-                  <a href="#">Size List</a>
+                  <a href="#">{{heading}} List</a>
                 </li>
               </ul>
             </div>
@@ -31,7 +31,7 @@
                 <div class="card">
                   <div class="card-header">
                     <div class="d-flex align-items-center">
-                      <h4 class="card-title">Size List</h4>
+                      <h4 class="card-title">{{heading}} List</h4>
                     </div>
                   </div>
                   <div class="card-body">
@@ -43,7 +43,7 @@
                         <thead>
                           <tr>
                             <th>No.</th>
-                            <th>Size</th>
+                            <th>{{heading}}</th>
                             <th style="width: 10%">Action</th>
                           </tr>
                         </thead>
@@ -75,7 +75,7 @@
                         <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ item.id }}" aria-hidden="true">
                           <div class="modal-dialog">
                             <div class="modal-content">
-                              <form method="post" action="{% url 'size_delete' item.id %}">
+                              <form method="post" action="{% url delete_url_name item.id %}">
                                 {% csrf_token %}
                                 <div class="modal-header">
                                   <h5 class="modal-title" id="deleteModalLabel{{ item.id }}">Confirm Delete</h5>
