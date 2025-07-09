@@ -114,6 +114,32 @@
               <li class="nav-item {% active_class 'products_list' %} {% active_class 'add_products' %}">
                 <a data-bs-toggle="collapse" href="#products">
                   <i class="fas fa-shopping-bag"></i>
+                  <p>Inventory</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="products">
+                  <ul class="nav nav-collapse">
+                    <li class="{% active_class '' %}">
+                      <a href="{% url '' %}">
+                        <span class="sub-item">Add Item </span>
+                      </a>
+                    </li>
+                    <li class="{% active_class 'size_list' %}">
+                      <a href="{% url 'size_list' %}">
+                        <span class="sub-item">Size list</span>
+                      </a>
+                    </li>
+                    <li class="{% active_class '' %}">
+                      <a href="{% url '' %}">
+                        <span class="sub-item">Color list</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item {% active_class 'products_list' %} {% active_class 'add_products' %}">
+                <a data-bs-toggle="collapse" href="#products">
+                  <i class="fas fa-shopping-bag"></i>
                   <p>Products</p>
                   <span class="caret"></span>
                 </a>

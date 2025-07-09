@@ -1,11 +1,17 @@
 {% extends "admin/admin_layout.html" %}
   {% load static %}
-  {% block title %}L I O R A | Add products{% endblock %}
+  {% block title %}L I O R A | {% if heading %}{{ heading }}{% else %}Add Category{% endif %}{% endblock %}
   {% block admin_content %} 
         <div class="container">
           <div class="page-inner">
             <div class="page-header">
-              <h3 class="fw-bold mb-3">Category</h3>
+              <h3 class="fw-bold mb-3">
+                {% if heading %}
+                    {{ heading }}
+                {% else %}
+                  Category
+                {% endif %}
+              </h3>
               <ul class="breadcrumbs mb-3">
                 <li class="nav-home">
                   <a href="#">
@@ -16,13 +22,25 @@
                   <i class="icon-arrow-right"></i>
                 </li>
                 <li class="nav-item">
-                  <a href="#">Categories</a>
+                  <a href="#">
+                    {% if heading %}
+                        {{ heading }}
+                    {% else %}
+                      Categories
+                    {% endif %}
+                  </a>
                 </li>
                 <li class="separator">
                   <i class="icon-arrow-right"></i>
                 </li>
                 <li class="nav-item">
-                  <a href="#">Add category</a>
+                  <a href="#">
+                    {% if heading %}
+                        {{ heading }}
+                    {% else %}
+                      Category
+                    {% endif %}
+                  </a>
                 </li>
               </ul>
             </div>
@@ -30,7 +48,13 @@
               <div class="col-md-12">
                 <div class="card">
                   <div class="card-header">
-                    <div class="card-title">Add Category</div>
+                    <div class="card-title">
+                      {% if heading %}
+                          {{ heading }}
+                      {% else %}
+                        Category
+                      {% endif %}
+                    </div>
                   </div>
                   <div class="card-body">
                     

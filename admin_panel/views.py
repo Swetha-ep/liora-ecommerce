@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from products.models import Product,Categories
-from .forms import CategoryForm
+from products.models import Product, Categories, Size, Color
+from .forms import CategoryForm, ProductForm
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -54,10 +54,47 @@ def products_list(request):
 
 # add product view
 def add_products(request):
+    heading = "Add Product"
     if request.method == 'POST':
-        form = CategoryForm(request.POST, request.FILES)
+        form = ProductForm(request.POST)
         if form.is_valid():
             form.save()
+            return redirect('products_list')
     else:
-        form = CategoryForm()
-    return render(request,'items/add_products.html',{'form':form})
+        form = ProductForm()
+    return render(request,'items/add_category.html',
+                  {'form':form, 'heading': heading})
+
+# edit product view
+def edit_product(request, pk):
+    heading = "Edit Product"
+    product = get_object_or_404(Product, id = pk)
+    if request.method == 'POST':
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('products_list')
+    else:
+        form = ProductForm(instance=product)
+    return render(request,'items/add_category.html',
+                  {'form':form, 'heading': heading})
+
+# delete product view
+def delete_product(request, pk):
+    product = get_object_or_404(Product,id=pk)
+    product.delete()
+    return redirect('products_list')
+
+
+# --------------------------size views-----------------------------
+class SizeList(ListView):
+    model = Size
+    template_name = 'inventory/property_list.html'
+    context_object_name = 'property'
+
+class SizeDelete(DeleteView):
+    model = Size
+    success_url =reverse_lazy('size_list')
+
+
+
