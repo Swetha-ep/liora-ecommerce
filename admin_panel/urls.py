@@ -14,9 +14,14 @@ urlpatterns = [
     path('edit_category/<pk>/', views.CategoryUpdate.as_view(), name='edit_category'),
     path('delete_category/<pk>/', views.CategoryDelete.as_view(), name='delete_category'),
 
-    path('size_list/', views.SizeList.as_view(), name='size_list'),
+    path('size_list/', views.add_size, name='size_list'),
     path('size_delete/<pk>/', views.SizeDelete.as_view(), name='size_delete'),
 
-    path('color_list/', views.ColorList.as_view(), name='color_list'),
+    path('color_list/', views.color_list, name='color_list'),
     path('color_delete/<pk>/', views.ColorDelete.as_view(), name='color_delete'),
+
+    path('add_stock/', views.add_stock, name='add_stock'),
+    path('edit_stock/<pk>/',views.edit_stock, name='edit_stock'),
+    path('stock_list/',views.stock_list, name='stock_list'),
+    path('stock_delete/<pk>/', views.stock_delete, name='stock_delete'),
 ]

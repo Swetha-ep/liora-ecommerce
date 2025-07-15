@@ -1,0 +1,142 @@
+{% extends "admin/admin_layout.html" %}
+  {% load static %}
+  {% block title %}L I O R A | Stock List{% endblock %}
+  {% block admin_content %} 
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Inventory</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Stock</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                {% if heading %}
+                  <li class="nav-item">
+                    <a href="#">{{heading}}</a>
+                  </li>
+                {% endif %}
+                <li class="nav-item">
+                  <a href="#">Stock List</a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      {% if heading %}
+                        <h4 class="card-title">{{heading}}</h4>
+                      {% endif %}
+                      <h4 class="card-title">Stock list</h4>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <!-- Modal -->
+                    
+                    <div class="table-responsive">
+                      <table
+                        id="add-row"
+                        class="display table table-striped table-hover"
+                      >
+                        <thead>
+                          <tr>
+                            <th>Image</th>
+                            <th>Name</th>
+                            <th>Size</th>
+                            <th>Color</th>
+                            <th>Quantity</th>
+                            <th style="width: 10%">Action</th>
+                          </tr>
+                        </thead>
+                        <!--looping through inventory and displaying as list-->
+                        {% for item in items%}
+                        <tbody>
+                          <tr>
+                            <td>
+                                {% if item.image %}
+                                <div class="avatar avatar-xxl">
+                                  <img src="{{ item.image.url }}" alt="..." class="avatar-img rounded-circle">
+                                </div>
+                                {% else %}
+                                  <p>No image available</p>
+                                {% endif %}
+                             
+                            </td>
+                            <td>{{item.product.name}}</td>
+                            <td>{{item.size.name}}</td>
+                            <td>{{item.color.name}}</td>
+                            <td>{{item.stock}}</td>
+                            <td>
+                              <div class="form-button-action">
+                                <a href="{% url 'edit_stock' item.id %}">
+                                  <button
+                                    type="button"
+                                    data-bs-toggle="tooltip"
+                                    title=""
+                                    class="btn btn-link btn-primary btn-lg"
+                                    data-original-title="Edit Task"
+                                  >
+                                    <i class="fa fa-edit"></i>
+                                  </button>
+                                </a>
+                                  <button
+                                    type="button"
+                                    data-bs-toggle="modal"
+                                    title=""
+                                    class="btn btn-link btn-danger"
+                                    data-original-title="Remove"
+                                    data-bs-target="#deleteModal{{ item.id }}"
+                                  >
+                                    <i class="fa fa-times"></i>
+                                  </button>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                        <!-- Modal -->
+                        <div class="modal fade" id="deleteModal{{ item.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ item.id }}" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <form method="post" action="{% url 'delete_product' item.id %}">
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="deleteModalLabel{{ item.id }}">Confirm Delete</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                    <i class="fa fa-times"></i>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  Are you sure you want to delete "{{ item.name }}"?
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="submit" class="btn btn-danger">Delete</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        <!--end of modal-->
+                        {% endfor %}
+                        <!--end of loop-->
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+  {% endblock admin_content %}

@@ -36,7 +36,7 @@ class Product(models.Model):
 
 class Color(models.Model):
     name = models.CharField(max_length=50)
-    hex_code = models.CharField(max_length=7, blank=True, help_text="e.g. #FF5733")
+    hex_code = models.CharField(max_length=7, blank=True)
 
     def __str__(self):
         return self.name

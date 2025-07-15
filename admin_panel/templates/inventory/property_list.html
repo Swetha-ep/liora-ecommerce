@@ -30,8 +30,17 @@
               <div class="col-md-12">
                 <div class="card">
                   <div class="card-header">
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center justify-content-between">
                       <h4 class="card-title">{{heading}} List</h4>
+                      <button
+                        type="button"
+                        class="btn btn-primary btn-round ms-auto"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addRowModal"
+                      >
+                        <i class="fa fa-plus"></i>
+                        Add Row
+                      </button>
                     </div>
                   </div>
                   <div class="card-body">
@@ -60,7 +69,6 @@
                                 <button
                                   type="button"
                                   data-bs-toggle="modal"
-                                  title=""
                                   class="btn btn-link btn-danger"
                                   data-original-title="Remove"
                                   data-bs-target="#deleteModal{{ item.id }}"
@@ -79,7 +87,7 @@
                                 {% csrf_token %}
                                 <div class="modal-header">
                                   <h5 class="modal-title" id="deleteModalLabel{{ item.id }}">Confirm Delete</h5>
-                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                  <button type="button" class="btn p-0 border-0 bg-transparent" data-bs-dismiss="modal" aria-label="Close">
                                     <i class="fa fa-times"></i>
                                   </button>
                                 </div>
@@ -98,6 +106,53 @@
                         <!--end of loop-->
                       </table>
 
+                      <!-- Add row Modal -->
+                        <div class="modal fade" id="addRowModal" tabindex="-1" aria-labelledby="addRowModal" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <form method="post" >
+                                {% csrf_token %}
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="addRowModal">New {{heading}}</h5>
+                                  <button type="button" class="btn p-0 border-0 bg-transparent" data-bs-dismiss="modal" aria-label="Close">
+                                    <i class="fa fa-times"></i>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                      <div class="col-sm-12">
+                                        <div class="form-group form-group-default">
+                                          {% if heading == 'Color'%}
+                                            <div class="mb-3">
+                                                {{ form.name.label_tag }}
+                                                {{ form.name }}
+                                            </div>
+                                            <div class="mb-3">
+                                                {{ form.hex_code.label_tag }}
+                                                {{ form.hex_code }}
+                                            </div>
+                                            <div class="mb-3">
+                                              <label class="form-label mb-3">Selected color :</label>
+                                                  <span id="colorPreview"
+                                                        style="display:inline-block; width:30px; height:30px; border:1px solid #ccc; vertical-align: middle; margin-left:10px;">
+                                                  </span>
+                                            </div>
+                                          {% else %}
+                                            {{ form.as_p }}
+                                          {% endif %}
+                                        </div>
+                                      </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="submit" class="btn btn-primary">Add</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        <!--end of add row modal-->
+
                     </div>
                   </div>
                 </div>
@@ -105,5 +160,22 @@
             </div>
           </div>
         </div>
+        <script>
+          document.addEventListener('DOMContentLoaded', function() {
+              const colorPicker = document.getElementById('id_hex_code');
+              const colorPreview = document.getElementById('colorPreview');
+
+              if (colorPicker && colorPreview) {
+                  // Set initial swatch on page load
+                  colorPreview.style.backgroundColor = colorPicker.value;
+
+                  // Update swatch live as user picks
+                  colorPicker.addEventListener('input', function() {
+                      colorPreview.style.backgroundColor = this.value;
+                  });
+              }
+          });
+        </script>
+
 
   {% endblock admin_content %}

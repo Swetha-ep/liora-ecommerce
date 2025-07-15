@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from products.models import Product, Categories, Size, Color
-from .forms import CategoryForm, ProductForm
+from products.models import Product, Categories, Size, Color, Inventory
+from .forms import CategoryForm, ProductForm, ColorForm, SizeForm, StockForm
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -87,38 +87,97 @@ def delete_product(request, pk):
 
 
 # --------------------------size views-----------------------------
-class SizeList(ListView):
-    model = Size
-    template_name = 'inventory/property_list.html'
-    context_object_name = 'property'
+# size listing and adding view 
+def add_size(request):
+    sizes = Size.objects.all()
+    form = SizeForm()
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['delete_url_name'] = 'size_delete'
-        context['heading'] = 'Size'
-        return context
+    if request.method == 'POST':
+        form = SizeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('size_list')
+    
+    context = {
+        'delete_url_name' : 'size_delete',
+        'heading' : 'Size',
+        'property' : sizes,
+        'form' :form
+    }
+    return render(request, 'inventory/property_list.html', context)
 
+# size delete view
 class SizeDelete(DeleteView):
     model = Size
     success_url =reverse_lazy('size_list')
 
 
 # --------------------------color views-----------------------------
-class ColorList(ListView):
-    model = Color
-    template_name = 'inventory/property_list.html'
-    context_object_name = 'property'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['delete_url_name'] = 'color_delete'
-        context['heading'] = 'Color'
-        return context
-    
+# color listing and adding view
+def color_list(request):
+    colors = Color.objects.all()
+    form = ColorForm()
+    if request.method == 'POST':
+        form = ColorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('color_list')
+    context = {
+        'delete_url_name' : 'color_delete',
+        'heading' : 'Color',
+        'property' : colors,
+        'form' : form,
+    }
+    return render(request,'inventory/property_list.html',context)
 
+
+# color delete view
 class ColorDelete(DeleteView):
     model = Color
     success_url =reverse_lazy('color_list')
 
 
 # --------------------------inventory views-----------------------------
+#  add stock view
+def add_stock(request):
+    if request.method == 'POST':
+        form = StockForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('products_list')
+    else:
+        form = StockForm()
+    return render(request, 'inventory/add_stock.html',{'form' : form})
+
+
+# edit stock view
+def edit_stock(request, pk):
+    heading = 'Edit Stock'
+    inventory = get_object_or_404(Inventory, id=pk)
+    if request.method == 'POST':
+        form = StockForm(request.POST,request.FILES,instance=inventory)
+        if form.is_valid():
+            form.save()
+            return redirect('stock_list')
+    else:
+        form = StockForm(instance=inventory)
+    return render(request, 
+                  'inventory/add_stock.html', 
+                  {'form' : form, 'heading' : heading})
+
+
+# stock list view
+def stock_list(request):
+    stock = Inventory.objects.all()
+    context = {
+        'items' : stock,
+    }
+    return render(request, 'inventory/stock_list.html', context)
+
+
+# stock delete view
+def stock_delete(request, pk):
+    stock = get_object_or_404(Inventory, id=pk)
+    stock.delete()
+    return redirect('stock_list')
+
