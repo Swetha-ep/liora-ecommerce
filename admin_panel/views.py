@@ -169,8 +169,19 @@ def edit_stock(request, pk):
 # stock list view
 def stock_list(request):
     stock = Inventory.objects.all()
+    category = Categories.objects.all()
+
+    category_id = request.GET.get('category')
+    selected_category = None
+
+    if category_id:
+        stock = stock.filter(product__category_id=category_id)
+        selected_category = Categories.objects.filter(id=category_id).first()
+
     context = {
         'items' : stock,
+        'categories' : category,
+        'selected_category' : selected_category,
     }
     return render(request, 'inventory/stock_list.html', context)
 

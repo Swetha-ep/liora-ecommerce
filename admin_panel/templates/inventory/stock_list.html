@@ -43,7 +43,25 @@
                     </div>
                   </div>
                   <div class="card-body">
-                    <!-- Modal -->
+
+                    <div class="dropdown">
+                        <input type="text" 
+                              class="form-control dropdown-toggle dropdown-input w-25" 
+                              placeholder="Select category" 
+                               value="{{ selected_category.name }}"
+                              data-bs-toggle="dropdown" 
+                              readonly>
+                        <ul class="dropdown-menu w-30">
+                          <li>
+                              <a class="dropdown-item" href="{% url 'stock_list' %}">All Categories</a>
+                          </li>
+                          {% for category in categories %}
+                            <li>
+                              <a class="dropdown-item" href="?category={{ category.id }}">{{ category.name }}</a>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                    </div>
                     
                     <div class="table-responsive">
                       <table
