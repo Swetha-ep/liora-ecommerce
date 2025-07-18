@@ -144,7 +144,7 @@ def add_stock(request):
         form = StockForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('products_list')
+            return redirect('stock_list')
     else:
         form = StockForm()
     return render(request, 'inventory/add_stock.html',{'form' : form})
