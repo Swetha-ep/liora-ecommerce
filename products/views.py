@@ -30,8 +30,20 @@ def shop(request):
 
 def product_view(request, slug):
     product = get_object_or_404(Product, slug=slug)
-    inventory = Inventory.objects.filter(product=product)
+    colors = Color.objects.filter(inventory_color__product = product).distinct()
+
+    selected_color_id = request.GET.get('color')
+    if selected_color_id:
+        selected_color = get_object_or_404(Color, id=selected_color_id)
+    else:
+        selected_color = colors.first()
+
+    inventories = Inventory.objects.filter(product=product, color=selected_color)
+
     context = {
-        'item' : inventory,
+        'product' : product,
+        'colors' : colors,
+        'selected_color' : selected_color,
+        'inventories' : inventories,
     }
     return render(request, 'products/product_details.html', context)

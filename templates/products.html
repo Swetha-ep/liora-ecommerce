@@ -118,7 +118,7 @@
                                     {% endwith %}
                                     <div class="product__item__text">
                                         <h6>{{item.name}}</h6>
-                                        <a href="{% url 'product_view' item.slug %}" class="add-cart">View</a>
+                                        <a href="{% url 'product_view' item.slug %}?color={{item.inventories.first.color.id}}" class="add-cart">View</a>
                                         <div class="rating">
                                             <i class="fa fa-star-o"></i>
                                             <i class="fa fa-star-o"></i>

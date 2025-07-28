@@ -1123,7 +1123,7 @@ ol {
 	background: #d5a667;
 }
 
-.product__item__text .product__color__select label.active:after {
+.product__details__option__color label.active:after {
 	opacity: 1;
 }
 
@@ -3736,6 +3736,9 @@ ol {
 		margin-right: 0;
 		margin-bottom: 25px;
 	}
+
+	
+
 	.product__details__last__option h5:before {
 		width: 440px;
 	}
