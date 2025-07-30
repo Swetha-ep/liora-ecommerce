@@ -40,53 +40,55 @@
                             </div>
                             <h3>₹ {{product.price}} <span>70.00</span></h3>
                             <p>{{product.description}}</p>
-                            <div class="product__details__option">
-                                <div class="product__details__option__size">
-                                    <span>Size:</span>
-                                    {% for inv in inventories %}
-                                    <label for="{{inv.size.name}}">
-                                        {{inv.size.name}}
-                                        <input type="radio" id="{{inv.size.name}}">
-                                    </label>
-                                    {% endfor %}
-                                </div>
-                                <div class="product__details__option__color">
-                                    
-                                        <span>Color:</span>
-                                        {% for color in colors %}
-                                            
-                                            <a href="{% url 'product_view' product.slug %}?color={{ color.id }}" style=" height:33px; width:33px; display:inline-block; border-radius:50%; {% if selected_color.id == color.id %}border: 2px solid black;{% endif %}">
-                                                <label
-                                                    class="color-{{ color.id }} {% if selected_color.id == color.id %}active{% endif %}"
-                                                    style="background: {{ color.hex_code }}; height:30px; width:30px; display:inline-block; cursor:pointer;"
-                                                >
-                                                </label>
-                                            </a>
-                                           
+                            <form method="POST" action="{% url 'buy_now' %}">
+                                {% csrf_token %}
+                                <div class="product__details__option">  
+                                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                                    <div class="product__details__option__size">
+                                        <span>Size:</span>
+                                        {% for inv in inventories %}
+                                        <label for="{{inv.size.name}}">
+                                            {{inv.size.name}}
+                                            <input type="radio" id="{{inv.size.name}}"
+                                            name="size_id"
+                                            value="{{ inv.size.id }}"
+                                            required>
+                                        </label>
                                         {% endfor %}
-                                    
-                                </div>
-                               
-                            </div>
-                            <div class="product__details__cart__option">
-                                <div class="quantity">
-                                    <div class="pro-qty">
-                                        <input type="text" value="1">
                                     </div>
+                                    <div class="product__details__option__color">    
+                                            <span>Color:</span>
+                                            {% for color in colors %}
+                                                <a href="{% url 'product_view' product.slug %}?color={{ color.id }}" style=" height:33px; width:33px; display:inline-block; border-radius:50%; {% if selected_color.id == color.id %}border: 2px solid black;{% endif %}">
+                                                    <label
+                                                        class="color-{{ color.id }} {% if selected_color.id == color.id %}active{% endif %}"
+                                                        style="background: {{ color.hex_code }}; height:30px; width:30px; display:inline-block; cursor:pointer;"
+                                                    >
+                                                    </label>
+                                                </a>
+                                            {% endfor %}
+                                    </div>
+                                    <input type="hidden" name="color_id" value="{{ selected_color.id }}">
                                 </div>
-                                <a href="#" class="primary-btn">add to cart</a>
-                            </div>
                             
+                                <div class="product__details__cart__option">
+                                    <div class="quantity">
+                                        <div style="width:60px; display: inline-block;">
+                                            <input type="number" name="quantity" value="1" min="1" max="{{ inventories.stock }}" style="width: 100%; padding: 5px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                                        </div>
+                                    </div>
+                                    <a href="#" class="primary-btn">add to cart</a>
+                                </div>
+                                <div class="product__details__cart__option">
+                                    <button type="submit" class="primary-btn">Buy Now</button>
+                                </div>
+                            </form>
                             <div class="product__details__btns__option">
                                 <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
                                 
                                 
                             </div>
 
-                            <div class="product__details__cart__option">
-                                
-                                <a href="#" class="primary-btn">Buy Now</a>
-                            </div>
 
                             <div class="product__details__last__option">
                                 <h5><span>Guaranteed Safe Checkout</span></h5>
