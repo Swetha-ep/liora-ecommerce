@@ -37,17 +37,89 @@
 
                         <div class="col-lg-8 col-md-6">  
                             {% for addr in addresses %}
-                            <div>
-                                <input type="radio" name="selected_address" value="{{ addr.id }}" id="address{{ forloop.counter }}">
-                                <label for="address{{ forloop.counter }}">
-                                    {{ addr.full_name }} - {{ addr.city }} ({{ addr.pincode }})
-                                    <button type="button" onclick="alert(`{{ addr.address_line }}, {{ addr.city }}, {{ addr.state }} - {{ addr.pincode }}`)">View</button>
-                                </label>
+                            <div class="col-12 mb-2">
+                                <div class="border rounded p-3 d-flex justify-content-between align-items-center" style="background-color: #f9f9f9;">
+                                    <div>
+                                    <div><strong>{{ addr.name }}</strong></div>
+                                    <div>{{ addr.city }} - {{ addr.pincode }}</div>
+                                    </div>
+
+                                    <div class="text-end">
+                                    <input type="radio" name="selected_address" value="{{ addr.id }}" class="form-check-input me-2">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            data-toggle="modal"
+                                            data-target="#viewAddressModal"
+                                            data-name="{{ addr.name }}"
+                                            data-phone="{{ addr.phone }}"
+                                            data-line1="{{ addr.address_line1 }}"
+                                            data-line2="{{ addr.address_line2 }}"
+                                            data-city="{{ addr.city }}"
+                                            data-state="{{ addr.state }}"
+                                            data-country="{{ addr.country }}"
+                                            data-pincode="{{ addr.pincode }}">
+                                        View
+                                    </button>
+                                    </div>
+                                </div>
                             </div>
+
+
                             {% empty %}
                                 <p>No address found. Go to ur profile and add one.</p>
                             {% endfor %}
                         </div>
+
+                        <!-- Address Detail Modal -->
+                        <div class="modal fade" id="viewAddressModal" tabindex="-1" role="dialog" aria-labelledby="viewAddressModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="viewAddressModalLabel">Address Details</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-2">
+                                    <div class="col-5 text-end fw-semibold">Name:</div>
+                                    <div class="col-7" id="modalName"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5 text-end fw-semibold">Phone:</div>
+                                    <div class="col-7" id="modalPhone"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5 text-end fw-semibold">Address Line 1:</div>
+                                    <div class="col-7" id="modalLine1"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5 text-end fw-semibold">Address Line 2:</div>
+                                    <div class="col-7" id="modalLine2"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5 text-end fw-semibold">City:</div>
+                                    <div class="col-7" id="modalCity"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5 text-end fw-semibold">State:</div>
+                                    <div class="col-7" id="modalState"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5 text-end fw-semibold">Country:</div>
+                                    <div class="col-7" id="modalCountry"></div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-5 text-end fw-semibold">Pincode:</div>
+                                    <div class="col-7" id="modalPincode"></div>
+                                </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        </div>
+
+
 
                         <div class="col-lg-4 col-md-6">
                             <div class="checkout__order">
@@ -81,6 +153,12 @@
         </div>
     </section>
     <!-- Checkout Section End -->
+     <!-- jQuery (must come first) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap 4 JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -96,9 +174,17 @@
         });
     </script>
      
-    
-
-
-
+    <script>
+        $('#viewAddressModal').on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget);
+            $('#modalName').text(button.data('name'));
+            $('#modalPhone').text(button.data('phone'));
+            $('#modalLine1').text(button.data('address_line1'));
+            $('#modalCity').text(button.data('city'));
+            $('#modalState').text(button.data('state'));
+            $('#modalCountry').text(button.data('country'));
+            $('#modalPincode').text(button.data('pincode'));
+        });
+    </script>
 
 {% endblock content %}
