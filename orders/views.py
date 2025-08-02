@@ -1,9 +1,13 @@
 from django.shortcuts import render
 from products.models import Inventory
+from accounts.models import Address
+from accounts.forms import AddressForm
 
 # Create your views here.
 
 def buy_now(request):
+    addresses = Address.objects.filter(user=request.user)
+    form = AddressForm
     if request.method == 'POST':
         product = request.POST.get('product_id')
         size = request.POST.get('size_id')
@@ -16,9 +20,10 @@ def buy_now(request):
             message = "Stock unavailable"
         
         context = {
-            
             'inventory' : inventory,
             'quantity' : quantity,
+            'addresses' : addresses,
+            'form' : form
         }
 
     return render(request, 'checkout.html', context)
