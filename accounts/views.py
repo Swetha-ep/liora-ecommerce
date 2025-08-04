@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
+from accounts.models import Address
 from .forms import AddressForm
-from django.http import JsonResponse
+
 # Create your views here.
 
 def auth_page(request):
@@ -66,7 +67,17 @@ def logout_view(request):
     return redirect('auth_login')
 
 
-def ajax_add_address(request):
+def profile(request):
+    addresses = Address.objects.filter(user=request.user)
+    form = AddressForm()
+    context = {
+        'addresses' : addresses,
+        'form' : form
+    }
+    return render(request,'accounts/profile.html', context)
+
+
+def add_address(request):
     if request.method == 'POST' and request.user.is_authenticated:
         form = AddressForm(request.POST)
         if form.is_valid():
@@ -74,13 +85,7 @@ def ajax_add_address(request):
             address.user = request.user
             address.save()
             messages.success(request, "Address added successfully!")
-            return JsonResponse({
-                'status': 'success',
-                'address_id': address.id,
-                'name': address.name,
-                'city': address.city,
-            })
+            return redirect('profile')
     else:
-        return JsonResponse({'status': 'error', 'errors': form.errors})
-
-    return JsonResponse({'status': 'failed'})
+        messages.error(request, 'Something went error. Try again')
+    return render(request,'accounts/profile.html')

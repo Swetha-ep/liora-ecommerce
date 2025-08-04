@@ -52,8 +52,8 @@
                                             data-target="#viewAddressModal"
                                             data-name="{{ addr.name }}"
                                             data-phone="{{ addr.phone }}"
-                                            data-line1="{{ addr.address_line1 }}"
-                                            data-line2="{{ addr.address_line2 }}"
+                                            data-lineone="{{ addr.address_line1 }}"
+                                            data-linetwo="{{ addr.address_line2 }}"
                                             data-city="{{ addr.city }}"
                                             data-state="{{ addr.state }}"
                                             data-country="{{ addr.country }}"
@@ -68,6 +68,7 @@
                             {% empty %}
                                 <p>No address found. Go to ur profile and add one.</p>
                             {% endfor %}
+                            <a href="{% url 'profile' %}" class="btn  site-btn ml-4 text-white">Add address</a>
                         </div>
 
                         <!-- Address Detail Modal -->
@@ -118,7 +119,6 @@
                             </div>
                         </div>
                         </div>
-
 
 
                         <div class="col-lg-4 col-md-6">
@@ -179,7 +179,8 @@
             const button = $(event.relatedTarget);
             $('#modalName').text(button.data('name'));
             $('#modalPhone').text(button.data('phone'));
-            $('#modalLine1').text(button.data('address_line1'));
+            $('#modalLine1').text(button.data('lineone'));
+            $('#modalLine2').text(button.data('linetwo'));
             $('#modalCity').text(button.data('city'));
             $('#modalState').text(button.data('state'));
             $('#modalCountry').text(button.data('country'));
