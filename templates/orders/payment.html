@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}L I O R A | Pay Now{% endblock %}
+{% block content %}
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+      <!-- Optional Illustration -->
+      <img src="https://png.pngtree.com/png-clipart/20220724/ourmid/pngtree-cute-packaging-delivery-box-png-image_6046130.png" alt="Payment" class="img-fluid mb-4" style="max-height: 250px;" />
+
+      <div class="card shadow-lg p-4">
+        <h4 class="mb-4 font-weight-bold">Choose Your Payment Method</h4>
+
+        <!-- Razorpay Button -->
+        <form id="payment-form" method="POST" action="{% url 'razorpay_payment'  order.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="payment_method" value="RZP">
+          <button id="rzp-button1" type="button" class="btn btn-dark btn-block mb-3">
+            💳 Pay with Razorpay
+          </button>
+        </form>
+
+        <!-- COD Button -->
+        <form action="{% url 'razorpay_payment' order.id %}" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="payment_method" value="COD">
+          <button type="submit" class="btn btn-outline-secondary btn-block">
+            💵 Cash on Delivery
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    var options = {
+        "key": "{{ razorpay_key }}",
+        "amount": "{{ amount }}",
+        "currency": "INR",
+        "name": "Liora",
+        "description": "Test Transaction",
+        "order_id": "{{ razorpay_order_id }}",
+        
+        "handler": function (response){
+            fetch("{% url 'your_orders' %}", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": "{{ csrf_token }}"
+              },
+              body: JSON.stringify({
+                  payment_id: response.razorpay_payment_id,
+                  order_id: response.razorpay_order_id,
+                  signature: response.razorpay_signature
+              })
+          }).then(res => {
+              window.location.href = "{% url 'your_orders' %}";
+          });
+        },
+        "modal": {
+            "ondismiss": function(){
+                alert("Payment cancelled.");
+                window.location.href = "{% url 'shop' %}";
+            }
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    document.getElementById('rzp-button1').onclick = function(e){
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
+
+{% endblock content %}

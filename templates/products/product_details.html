@@ -40,10 +40,11 @@
                             </div>
                             <h3>₹ {{product.price}} <span>70.00</span></h3>
                             <p>{{product.description}}</p>
-                            <form method="POST" action="{% url 'buy_now' %}">
+                            <form method="POST" id="product_details_form" action="{% url 'buy_now' %}">
                                 {% csrf_token %}
                                 <div class="product__details__option">  
                                     <input type="hidden" name="product_id" value="{{ product.id }}">
+                                    <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
                                     <div class="product__details__option__size">
                                         <span>Size:</span>
                                         {% for inv in inventories %}
@@ -51,8 +52,7 @@
                                             {{inv.size.name}}
                                             <input type="radio" id="{{inv.size.name}}"
                                             name="size_id"
-                                            value="{{ inv.size.id }}"
-                                            required>
+                                            value="{{ inv.size.id }}">
                                         </label>
                                         {% endfor %}
                                     </div>
@@ -259,5 +259,19 @@
         </div>
     </section>
     <!-- Related Section End -->
+
+    <script>
+        document.getElementById('product_details_form').addEventListener('submit', function(e) {
+            const selectedSize = document.querySelector('input[name="size_id"]:checked');
+            const errorDiv = document.getElementById('error-message');
+            if (!selectedSize) {
+                e.preventDefault();
+                errorDiv.textContent = "Please select a Size to continue.";
+                errorDiv.classList.remove('d-none');
+            } else {
+                errorDiv.classList.add('d-none');
+            }
+        });
+    </script>
 
 {% endblock content %}

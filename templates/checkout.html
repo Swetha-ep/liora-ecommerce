@@ -27,7 +27,8 @@
     <section class="checkout spad">
         <div class="container">
             <div class="checkout__form">
-                <form method="POST" action="">
+                <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+                <form method="POST" id="checkout-form" action="{% url 'place_order' %}">
                     {% csrf_token %}
                     <div class="row">
                         <input type="hidden" name="product_id" value="{{ inventory.product.id }}">
@@ -45,7 +46,7 @@
                                     </div>
 
                                     <div class="text-end">
-                                    <input type="radio" name="selected_address" value="{{ addr.id }}" class="form-check-input me-2">
+                                    <input type="radio" name="selected_address" value="{{ addr.id }}" class="form-check-input me-2" {% if addr.is_default %}checked{% endif %}>
                                     <button type="button"
                                             class="btn btn-sm btn-outline-secondary"
                                             data-toggle="modal"
@@ -143,8 +144,16 @@
                                         <span class="checkmark"></span>
                                     </label>
                                 </div>
-                                
-                                <button type="submit" class="site-btn">PLACE ORDER</button>
+
+                                {% comment %} <form method='POST' action="{% url 'place_order' %}">
+                                    {% csrf_token %} {% endcomment %}
+                                    <input type="hidden" name="inventory_id" value="{{inventory.id}}">
+                                    <input type="hidden" name="address_id" id="selectedAddressId">
+                                    <input type="hidden" name="quantity" value="{{ quantity }}">
+                                    <input type="hidden" name="total_price" id="totalPriceInput">
+                                    
+                                    <button type="submit" class="site-btn">PLACE ORDER</button>
+                                {% comment %} </form> {% endcomment %}
                             </div>
                         </div>
                     </div>
@@ -171,6 +180,12 @@
 
             document.getElementById('subtotal').textContent = `₹ ${subtotal.toFixed(2)}`;
             document.getElementById('total').textContent = `₹ ${total.toFixed(2)}`;
+
+            const totalPriceInput = document.getElementById('totalPriceInput');
+            if (totalPriceInput) {
+                totalPriceInput.value = total.toFixed(2);
+            }
+
         });
     </script>
      
@@ -187,5 +202,39 @@
             $('#modalPincode').text(button.data('pincode'));
         });
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addressRadios = document.querySelectorAll('input[name="selected_address"]');
+            const hiddenInput = document.getElementById('selectedAddressId');
+
+            
+            const checkedRadio = document.querySelector('input[name="selected_address"]:checked');
+            if (checkedRadio) {
+                hiddenInput.value = checkedRadio.value;
+            }
+
+            addressRadios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    hiddenInput.value = this.value;
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            const selectedAddress = document.querySelector('input[name="selected_address"]:checked');
+            const errorDiv = document.getElementById('error-message');
+            if (!selectedAddress) {
+                e.preventDefault();
+                errorDiv.textContent = "Please select a delivery address.";
+                errorDiv.classList.remove('d-none');
+            } else {
+                errorDiv.classList.add('d-none');
+            }
+        });
+    </script>
+
 
 {% endblock content %}

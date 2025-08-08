@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h3 class="mb-4">Your Orders</h3>
+
+    {% if orders %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                    <th>Payment Method</th>
+                    <th>Order Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ order.inventory.product.name }}</td>
+                    <td>{{ order.quantity }}</td>
+                    <td>₹ {{ order.total_price }}</td>
+                    <td>
+                        {% if order.order_status == "Pending" %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% elif order.order_status == "Shipped" %}
+                            <span class="badge badge-info">Shipped</span>
+                        {% elif order.order_status == "Delivered" %}
+                            <span class="badge badge-success">Delivered</span>
+                        {% else %}
+                            <span class="badge badge-secondary">{{ order.order_status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ order.payment_method }}</td>
+                    <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-info">You haven’t placed any orders yet.</div>
+    {% endif %}
+</div>
+{% endblock %}
