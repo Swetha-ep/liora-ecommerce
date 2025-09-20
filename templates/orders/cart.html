@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}L I O R A | Cart{% endblock %}
+{% block content %}
+    
+
+    
+    <!-- Header Section End -->
+
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__text">
+                        <h4>Shopping Cart</h4>
+                        <div class="breadcrumb__links">
+                            <a href="{% url 'index' %}">Home</a>
+                            <a href="{% url 'shop' %}">Shop</a>
+                            <span>Shopping Cart</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Breadcrumb Section End -->
+
+    <!-- Shopping Cart Section Begin -->
+    <section class="shopping-cart spad">
+        <div class="container">
+            <form method="POST" id="checkout-form" action="{% url 'cart_place_order' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="shopping__cart__table">
+                            {% if cart %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart.items.all %}
+                                    <tr>
+                                        <td class="product__cart__item">
+                                            <div class="product__cart__item__pic">
+                                                <img src="{{ item.inventory.image.url }}" alt="{{ item.inventory.product.name }}"
+                                                style="width: 100px; height: 120px; object-fit: cover;">
+                                            </div>
+                                            <div class="product__cart__item__text">
+                                                <h6>{{ item.inventory.product.name }} - {{item.inventory.size}}</h6>
+                                                <h5>₹ {{ item.inventory.product.price }}</h5>
+                                            </div>
+                                        </td>
+                                        <td class="quantity__item">
+                                            <div class="quantity">
+                                                <div>
+                                                    <input type="number" class="qty-input"
+                                                    style="width:56px; text-align:center; padding:2px 6px; font-size:14px"
+                                                    value="{{ item.quantity }}" min="1"
+                                                    data-update-url="{% url 'update_cart_quantity' item.id %}"
+                                                    data-item-id="{{item.id}}">
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="cart__price row-total">₹ {{ item.subtotal }}</td>
+                                        <td class="cart__close">
+                                            <a href="{% url 'delete_cart_item' item.id %}">
+                                                <i class="fa fa-close"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                                <p>Your cart is empty.</p>
+                            {% endif %}
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-6">
+                                <div class="continue__btn">
+                                    <a href="#">Continue Shopping</a>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="cart__discount mt-5">  
+                            {% for addr in addresses %}
+                            <div class="col-12 mb-2">
+                                <div class="border rounded p-3 d-flex justify-content-between align-items-center" style="background-color: #f9f9f9;">
+                                    <div>
+                                    <div><strong>{{ addr.name }}</strong></div>
+                                    <div>{{ addr.city }} - {{ addr.pincode }}</div>
+                                    </div>
+
+                                    <div class="text-end">
+                                    <input type="radio" name="selected_address" value="{{ addr.id }}" class="form-check-input me-2" {% if addr.is_default %}checked{% endif %}>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            data-toggle="modal"
+                                            data-target="#viewAddressModal"
+                                            data-name="{{ addr.name }}"
+                                            data-phone="{{ addr.phone }}"
+                                            data-lineone="{{ addr.address_line1 }}"
+                                            data-linetwo="{{ addr.address_line2 }}"
+                                            data-city="{{ addr.city }}"
+                                            data-state="{{ addr.state }}"
+                                            data-country="{{ addr.country }}"
+                                            data-pincode="{{ addr.pincode }}">
+                                        View
+                                    </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                                <p>No address found. Go to ur profile and add one.</p>
+                            {% endfor %}
+                            
+                            {% comment %} </form> {% endcomment %}
+                            <a href="{% url 'profile' %}" class="btn  site-btn ml-4 text-white">Add address</a>
+                        </div>
+
+                        <!-- Address Detail Modal -->
+                        <div class="modal fade" id="viewAddressModal" tabindex="-1" role="dialog" aria-labelledby="viewAddressModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="viewAddressModalLabel">Address Details</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-end fw-semibold">Name:</div>
+                                        <div class="col-7" id="modalName"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-end fw-semibold">Phone:</div>
+                                        <div class="col-7" id="modalPhone"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-end fw-semibold">Address Line 1:</div>
+                                        <div class="col-7" id="modalLine1"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-end fw-semibold">Address Line 2:</div>
+                                        <div class="col-7" id="modalLine2"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-end fw-semibold">City:</div>
+                                        <div class="col-7" id="modalCity"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-end fw-semibold">State:</div>
+                                        <div class="col-7" id="modalState"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-end fw-semibold">Country:</div>
+                                        <div class="col-7" id="modalCountry"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-5 text-end fw-semibold">Pincode:</div>
+                                        <div class="col-7" id="modalPincode"></div>
+                                    </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                    </div> 
+                    <div class="col-lg-4">
+                        
+                        
+                        <div class="cart__discount">
+                            <h6>Discount codes</h6>
+                            <form action="#">
+                                <input type="text" placeholder="Coupon code">
+                                <button type="submit">Apply</button>
+                            </form>
+                        </div>
+
+                        <div class="cart__total">
+                            <h6>Cart total</h6>
+                            <ul>
+                                <li >Subtotal <span class="cart-total">₹ {{ cart.total_price }}</span></li>
+                                <li>Tax<span id="tax" data-tax="20">₹ 20</span></li>
+                                <ul class="checkout__total__all">
+                                    <li>Total <span class="cart-grand-total">₹ {{ grand_total }}</span></li>
+                                </ul>
+                            </ul>
+                            <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+                            <button type="submit"  class="primary-btn">Proceed to checkout</button>
+                        </div>
+                        <input type="hidden" id="selectedAddressId" name="selected_address_id">
+                        
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <!-- Shopping Cart Section End -->
+
+     <!-- jQuery (must come first) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap 4 JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        function updateQuantity(event) {
+            let inputField = event.target;
+            let itemId = inputField.dataset.itemId;
+            let updateUrl = inputField.dataset.updateUrl;
+            let quantity = inputField.value;
+            let row = inputField.closest('tr');
+            console.log("Quantity changed:", quantity, "for item:", itemId);
+
+            fetch(updateUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `quantity=${quantity}`
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Network response was not ok " + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Server response:", data);
+                if (data.success) {
+                    row.querySelector('.row-total').textContent = `₹ ${data.row_total}`;
+                    document.querySelector('.cart-total').textContent = `₹ ${data.cart_total}`;
+                    document.querySelector('.cart-grand-total').textContent = `₹ ${data.grand_total}`;
+                } else {
+                    alert(data.error);
+                    inputField.value = 1;
+                }
+            })
+            .catch(error => {
+                console.error("Error updating cart:", error); 
+            });
+        }
+
+        document.querySelectorAll('.qty-input').forEach(input => {
+            input.addEventListener('input', updateQuantity);   // fires immediately
+            input.addEventListener('change', updateQuantity);  // fallback
+        });
+
+        const TAX = 20;
+
+        function recalcTotals() {
+            let subtotal = 0;
+
+                    
+            document.querySelectorAll('.row-total').forEach(row => {
+                let val = parseFloat(row.textContent.replace('₹', '').trim()) || 0;
+                subtotal += val;
+            });
+
+            let grandTotal = subtotal + TAX;
+
+            
+            document.querySelector('.cart-total').textContent = `₹ ${subtotal.toFixed(2)}`;
+            document.querySelector('#tax').textContent = `₹ ${TAX.toFixed(2)}`;
+            document.querySelector('.cart-grand-total').textContent = `₹ ${grandTotal.toFixed(2)}`;
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', recalcTotals);
+    </script>
+
+    <script>
+        $('#viewAddressModal').on('show.bs.modal', function (event) {
+            const button = $(event.relatedTarget);
+            $('#modalName').text(button.data('name'));
+            $('#modalPhone').text(button.data('phone'));
+            $('#modalLine1').text(button.data('lineone'));
+            $('#modalLine2').text(button.data('linetwo'));
+            $('#modalCity').text(button.data('city'));
+            $('#modalState').text(button.data('state'));
+            $('#modalCountry').text(button.data('country'));
+            $('#modalPincode').text(button.data('pincode'));
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addressRadios = document.querySelectorAll('input[name="selected_address"]');
+            const hiddenInput = document.getElementById('selectedAddressId');
+
+            
+            const checkedRadio = document.querySelector('input[name="selected_address"]:checked');
+            if (checkedRadio) {
+                hiddenInput.value = checkedRadio.value;
+            }
+
+            addressRadios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    hiddenInput.value = this.value;
+                });
+            });
+        });
+    </script>
+
+    <script>
+        document.getElementById('checkout-form').addEventListener('submit', function(e) {
+            const selectedAddress = document.querySelector('input[name="selected_address"]:checked');
+            const errorDiv = document.getElementById('error-message');
+            if (!selectedAddress) {
+                e.preventDefault();
+                errorDiv.textContent = "Please select a delivery address.";
+                errorDiv.classList.remove('d-none');
+                errorDiv.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                errorDiv.classList.add('d-none');
+            }
+        });
+    </script>
+
+
+{% endblock content%}
+
+    
+    

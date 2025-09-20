@@ -103,6 +103,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# AUTH_USER_MODEL = User
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -136,3 +137,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 RAZORPAY_KEY_ID = 'rzp_test_XbqRrCuWdW6OQf'
 RAZORPAY_KEY_SECRET = '4P0eqTBTPBUEo5Smr9vwET8O'
+
+LOGIN_URL = '/accounts/auth_page/'

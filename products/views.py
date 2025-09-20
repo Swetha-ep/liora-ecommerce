@@ -38,7 +38,10 @@ def product_view(request, slug):
     else:
         selected_color = colors.first()
 
-    inventories = Inventory.objects.filter(product=product, color=selected_color)
+    inventories = Inventory.objects.filter(
+        product=product, 
+        color=selected_color,
+        stock__gt=0)
 
     context = {
         'product' : product,
