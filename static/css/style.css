@@ -3852,3 +3852,12 @@ ol {
 		height: 250px;
 	}
 }
+
+.qty-input {
+    width: 10px;          
+    text-align: center;  
+    padding: 4px 6px;     
+    font-size: 14px;      
+    border: 1px solid #ccc;
+    border-radius: 1px;
+}

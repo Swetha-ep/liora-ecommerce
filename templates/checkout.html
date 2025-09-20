@@ -36,7 +36,7 @@
                         <input type="hidden" name="color_id" value="{{ inventory.color.id }}">
                         <input type="hidden" name="quantity" value="{{ quantity }}">
 
-                        <div class="col-lg-8 col-md-6">  
+                        <div class="col-lg-6 col-md-5">  
                             {% for addr in addresses %}
                             <div class="col-12 mb-2">
                                 <div class="border rounded p-3 d-flex justify-content-between align-items-center" style="background-color: #f9f9f9;">
@@ -122,13 +122,13 @@
                         </div>
 
 
-                        <div class="col-lg-4 col-md-6">
+                        <div class="col-lg-6 col-md-7">
                             <div class="checkout__order">
                                 <h4 class="order__title">Your order</h4>
                                 <div class="checkout__order__products"><strong>Product </strong><span><strong>Total</strong></span></div>
                                 <ul class="checkout__total__products">
-                                    <li>{{inventory.product.name}} <span id="price" data-price="{{ inventory.product.price }}">₹ {{inventory.product.price}}</span></li>
-                                    <li>Quantity<span id="quantity" data-quantity="{{ quantity }}">{{quantity}}</span></li>
+                                    <li>{{inventory.product.name}} <span id="price" data-price="{{ inventory.product.price }}">₹ {{inventory.product.price}} * <span id="quantity" data-quantity="{{ quantity }}">{{quantity}}</span></span></li>
+                                    
                                     <li>Tax<span id="tax" data-tax="20">₹ 20</span></li>
                                 </ul>
                                 <ul class="checkout__total__all">
@@ -144,16 +144,14 @@
                                         <span class="checkmark"></span>
                                     </label>
                                 </div>
-
-                                {% comment %} <form method='POST' action="{% url 'place_order' %}">
-                                    {% csrf_token %} {% endcomment %}
-                                    <input type="hidden" name="inventory_id" value="{{inventory.id}}">
-                                    <input type="hidden" name="address_id" id="selectedAddressId">
-                                    <input type="hidden" name="quantity" value="{{ quantity }}">
-                                    <input type="hidden" name="total_price" id="totalPriceInput">
-                                    
-                                    <button type="submit" class="site-btn">PLACE ORDER</button>
-                                {% comment %} </form> {% endcomment %}
+      
+                                <input type="hidden" name="inventory_id" value="{{inventory.id}}">
+                                <input type="hidden" name="address_id" id="selectedAddressId">
+                                <input type="hidden" name="quantity" value="{{ quantity }}">
+                                <input type="hidden" name="total_price" id="totalPriceInput">
+                                
+                                <button type="submit" class="site-btn">PLACE ORDER</button>
+                                
                             </div>
                         </div>
                     </div>

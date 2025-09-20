@@ -44,15 +44,22 @@
                                 {% csrf_token %}
                                 <div class="product__details__option">  
                                     <input type="hidden" name="product_id" value="{{ product.id }}">
-                                    <div id="error-message" class="alert alert-danger d-none" role="alert"></div>
+
+                                    <div id="error-message" class="alert alert-danger d-none" role="alert">
+
+                                    </div>
+
+                                    
+
                                     <div class="product__details__option__size">
                                         <span>Size:</span>
                                         {% for inv in inventories %}
-                                        <label for="{{inv.size.name}}">
+                                        <label for="size_{{inv.id}}">
                                             {{inv.size.name}}
-                                            <input type="radio" id="{{inv.size.name}}"
+                                            <input type="radio" id="size_{{inv.id}}"
                                             name="size_id"
-                                            value="{{ inv.size.id }}">
+                                            value="{{ inv.size.id }}"
+                                            data-stock="{{ inv.stock }}">
                                         </label>
                                         {% endfor %}
                                     </div>
@@ -73,14 +80,23 @@
                             
                                 <div class="product__details__cart__option">
                                     <div class="quantity">
+                                        {% if  inventories  %}
                                         <div style="width:60px; display: inline-block;">
-                                            <input type="number" name="quantity" value="1" min="1" max="{{ inventories.stock }}" style="width: 100%; padding: 5px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                                            <input type="number" id="quantity-input" name="quantity" value="1" min="1" style="width: 100%; padding: 5px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px;" disabled>
+                                            <small id="quantity-hint" style="color:#888;">Select a size to enable</small>
                                         </div>
+                                        {% endif %}
                                     </div>
-                                    <a href="#" class="primary-btn">add to cart</a>
+                                    {% if  inventories %}
+                                    <a href="#" id="add_to_cart_btn" class="primary-btn">add to cart</a>
+                                    {% else %}
+                                    <p> Stock unavailable </p>
+                                    {% endif %}
                                 </div>
                                 <div class="product__details__cart__option">
-                                    <button type="submit" class="primary-btn">Buy Now</button>
+                                    {% if  inventories  %}
+                                    <button type="submit"  class="primary-btn">Buy Now</button>
+                                    {% endif %}
                                 </div>
                             </form>
                             <div class="product__details__btns__option">
@@ -261,7 +277,7 @@
     <!-- Related Section End -->
 
     <script>
-        document.getElementById('product_details_form').addEventListener('submit', function(e) {
+        {% comment %} document.getElementById('product_details_form').addEventListener('submit', function(e) {
             const selectedSize = document.querySelector('input[name="size_id"]:checked');
             const errorDiv = document.getElementById('error-message');
             if (!selectedSize) {
@@ -271,7 +287,67 @@
             } else {
                 errorDiv.classList.add('d-none');
             }
+        }); {% endcomment %}
+
+        function validateSizeSelection() {
+            const selectedSize = document.querySelector('input[name="size_id"]:checked');
+            const errorDiv = document.getElementById('error-message');
+
+            if (!selectedSize) {
+                errorDiv.textContent = "Please select a Size to continue.";
+                errorDiv.classList.remove('d-none');
+                return false;
+            } else {
+                errorDiv.classList.add('d-none');
+                return true;
+            }
+        }
+
+
+        document.getElementById('product_details_form').addEventListener('submit', function(e) {
+            if (!validateSizeSelection()) {
+                e.preventDefault();
+            }
+        });
+
+
+        document.getElementById('add_to_cart_btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (validateSizeSelection()) {
+                const form = document.getElementById('product_details_form');
+                form.action = "{% url 'add_to_cart' %}";
+                form.submit();
+            }
+        });
+
+
+
+    </script>
+
+    <script>
+        const addBtn = document.getElementById('add_to_cart_btn');
+        document.querySelectorAll('input[name="size_id"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                let stock = this.getAttribute('data-stock');
+                let qtyInput = document.getElementById('quantity-input');
+                let qtyHint = document.getElementById('quantity-hint');
+
+                qtyInput.disabled = false; 
+                qtyInput.max = stock;
+                qtyInput.value = 1;
+                qtyHint.style.display = "none"; // reset to 1 whenever new size is picked
+                document.getElementById('error-message').classList.add('d-none');
+                addBtn.classList.remove('disabled'); 
+            });
         });
     </script>
+
+
+    <script>
+        
+    </script>
+
+    
+
 
 {% endblock content %}
