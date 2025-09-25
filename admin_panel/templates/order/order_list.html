@@ -1,0 +1,113 @@
+{% extends "admin/admin_layout.html" %}
+  {% load static %}
+  {% block title %}L I O R A | product list{% endblock %}
+  {% block admin_content %} 
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">Orders</h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Orders</a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">Orders List</a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="d-flex align-items-center">
+                      <h4 class="card-title">Orders list</h4>
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <!-- Modal -->
+                    
+                    <div class="table-responsive">
+                      <table
+                        id="add-row"
+                        class="display table table-striped table-hover"
+                      >
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                            <th>Status</th>
+                            <th>Payment Method</th>
+                            <th>Order Date</th>
+                            <th style="width: 10%">Address</th>
+                          </tr>
+                        </thead>
+                        <!--looping through orders and displaying as list-->
+                        <tbody>
+                            {% for order in order %}
+                                {% for item in order.order.all %}
+                                    <tr>
+                                        <td>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</td>
+                                        <td>{{ item.inventory.product.name }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>₹ {{ item.price }}</td>
+                                        <td>
+                                            <div id="status-display-{{ order.id }}" class="d-inline-flex align-items-center gap-1">
+                                                {% if order.order_status == "Pending" %}
+                                                    <span class="badge badge-warning">Pending</span>
+                                                {% elif order.order_status == "Shipped" %}
+                                                    <span class="badge badge-info">Shipped</span>
+                                                {% elif order.order_status == "Delivered" %}
+                                                    <span class="badge badge-success">Delivered</span>
+                                                {% elif order.order_status == "Cancelled" %}
+                                                    <span class="badge badge-secondary">Cancelled</span>
+                                                {% endif %}
+                                                <button type="button" class="btn btn-sm btn-link p-0" onclick="editStatus({{ order.id }})">
+                                                    <i class="fa fa-edit"></i>
+                                                </button>
+                                            </div>
+
+                                            <div id="status-edit-{{ order.id }}" style="display: none;">
+                                                <form action="{% url 'order_status_update' order.id %}" method="post" id="status-form-{{ order.id }}">
+                                                    {% csrf_token %}
+                                                    <select name="order_status" class="form-control form-control-sm"
+                                                            onchange="document.getElementById('status-form-{{ order.id }}').submit();">
+                                                        <option value="Pending" {% if order.order_status == "Pending" %}selected{% endif %}>Pending</option>
+                                                        <option value="Shipped" {% if order.order_status == "Shipped" %}selected{% endif %}>Shipped</option>
+                                                        <option value="Delivered" {% if order.order_status == "Delivered" %}selected{% endif %}>Delivered</option>
+                                                        <option value="Cancelled" {% if order.order_status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+                                                    </select>
+                                                </form>
+                                            </div>
+                                        </td>
+                                        <td>{{ order.payment_method }}</td>
+                                        <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
+                                        <td>{{ order.address }}</td>
+                                    </tr>
+                            {% endfor %}
+                          {% endfor %}
+                        </tbody>
+                        
+                        <!--end of loop-->
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+  {% endblock admin_content %}

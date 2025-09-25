@@ -16,4 +16,6 @@ urlpatterns = [
     path('update-cart/<int:item_id>/', views.update_cart_quantity, name='update_cart_quantity'),
     path('delete_cart_item/<int:item_id>/', views.delete_cart_item, name='delete_cart_item'),
     path('cart_place_order/', views.cart_place_order, name='cart_place_order'),
+
+    path('apply-coupon/', views.apply_coupon_ajax, name='apply_coupon_ajax'),
 ]

@@ -19,25 +19,27 @@
             </thead>
             <tbody>
                 {% for order in orders %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ order.inventory.product.name }}</td>
-                    <td>{{ order.quantity }}</td>
-                    <td>₹ {{ order.total_price }}</td>
-                    <td>
-                        {% if order.order_status == "Pending" %}
-                            <span class="badge badge-warning">Pending</span>
-                        {% elif order.order_status == "Shipped" %}
-                            <span class="badge badge-info">Shipped</span>
-                        {% elif order.order_status == "Delivered" %}
-                            <span class="badge badge-success">Delivered</span>
-                        {% else %}
-                            <span class="badge badge-secondary">{{ order.order_status }}</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ order.payment_method }}</td>
-                    <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
-                </tr>
+                    {% for item in order.order.all %}
+                    <tr>
+                        <td>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</td>
+                        <td>{{ item.inventory.product.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹ {{ order.total_price }}</td>
+                        <td>
+                            {% if order.order_status == "Pending" %}
+                                <span class="badge badge-warning">Pending</span>
+                            {% elif order.order_status == "Shipped" %}
+                                <span class="badge badge-info">Shipped</span>
+                            {% elif order.order_status == "Delivered" %}
+                                <span class="badge badge-success">Delivered</span>
+                            {% else %}
+                                <span class="badge badge-secondary">{{ order.order_status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ order.payment_method }}</td>
+                        <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>
+                    </tr>
+                    {% endfor %}
                 {% endfor %}
             </tbody>
         </table>

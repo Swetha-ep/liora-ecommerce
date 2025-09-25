@@ -42,6 +42,9 @@
 
     <!-- CSS Just for demo purpose, don't include it in your project -->
     <link rel="stylesheet" href="{% static 'css/demo.css' %}" />
+    
+
+
   </head>
   <body>
     <div class="wrapper">
@@ -158,6 +161,43 @@
                     <li class="{% active_class 'color_list' %}">
                       <a href="{% url 'color_list' %}">
                         <span class="sub-item">Color list</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item {% active_class 'order_list' %}">
+                <a data-bs-toggle="collapse" href="#order">
+                  <i class="fas fa-receipt"></i>
+                  <p>Orders</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="order">
+                  <ul class="nav nav-collapse">
+                    <li class="{% active_class 'order_list' %}">
+                      <a href="{% url 'order_list' %}">
+                        <span class="sub-item">Orders List </span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item {% active_class 'coupon_list' %} {% active_class 'add_coupon' %}">
+                <a data-bs-toggle="collapse" href="#coupon">
+                  <i class="fas fa-tag"></i>
+                  <p>Coupon</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="coupon">
+                  <ul class="nav nav-collapse">
+                    <li class="{% active_class 'coupon_list' %}">
+                      <a href="{% url 'coupon_list' %}">
+                        <span class="sub-item">Coupons List </span>
+                      </a>
+                    </li>
+                    <li class="{% active_class 'add_coupon' %}">
+                      <a href="{% url 'add_coupon' %}">
+                        <span class="sub-item">Add Coupon</span>
                       </a>
                     </li>
                   </ul>
@@ -584,6 +624,7 @@
         </footer>
       </div>
     </div>
+    
 
     <!--   Core JS Files   -->
     <script src="{% static 'js/core/jquery-3.7.1.min.js' %}"></script>
@@ -708,5 +749,11 @@
       });
     </script>
     <!--end of product_list table scripts-->
+    <script>
+      function editStatus(orderId) {
+          document.getElementById("status-display-" + orderId).style.display = "none";
+          document.getElementById("status-edit-" + orderId).style.display = "block";
+      }
+    </script>
   </body>
 </html>

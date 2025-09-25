@@ -24,4 +24,11 @@ urlpatterns = [
     path('edit_stock/<pk>/',views.edit_stock, name='edit_stock'),
     path('stock_list/',views.stock_list, name='stock_list'),
     path('stock_delete/<pk>/', views.stock_delete, name='stock_delete'),
+
+    path('order_list/', views.order_list, name='order_list'),
+    path('order_status/<int:order_id>/', views.order_status_update, name="order_status_update"),
+
+    path('coupon_list/', views.coupon_list, name='coupon_list'),
+    path('add_coupon/',views.add_coupon, name='add_coupon'),
+    path('edit_coupon/<pk>/', views.edit_coupon, name='edit_coupon'),
 ]

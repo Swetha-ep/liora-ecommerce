@@ -1,0 +1,77 @@
+{% extends "admin/admin_layout.html" %}
+  {% load static %}
+  {% block title %}L I O R A | {% if heading %}{{ heading }}{% else %}Add Coupon{% endif %}{% endblock %}
+  {% block admin_content %} 
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">
+                {% if heading %}
+                    {{ heading }}
+                {% else %}
+                  Coupon
+                {% endif %}
+              </h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">
+                    {% if heading %}
+                        {{ heading }}
+                    {% else %}
+                      Coupon
+                    {% endif %}
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">
+                    {% if heading %}
+                        {{ heading }}
+                    {% else %}
+                      Coupon
+                    {% endif %}
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      {% if heading %}
+                          {{ heading }}
+                      {% else %}
+                        Coupon
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <!--Form-->
+                    <form method="POST" >
+                      {% csrf_token %}
+                      {{ form.as_p }}
+                      <div class="card-action">
+                        <button class="btn btn-success" type= "submit">Submit</button>
+                      </div>
+                    </form>
+                    <!--End Form-->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+  {% endblock admin_content %}

@@ -11,6 +11,7 @@ import razorpay
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from orders.helper import send_order_email, apply_coupon
 
 
 def buy_now(request):
@@ -113,6 +114,10 @@ def verify_payment(request, order_id):
         order.is_paid = True
         order.payment_method = 'RZP'
         order.save()
+
+        cart_items = CartItem.objects.filter(cart__user=request.user)
+        cart_items.delete()
+
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'invalid'}, status=400)
 
@@ -135,6 +140,7 @@ def pay(request, order_id):
             order.payment_method = 'RZP'
             order.razorpay_order_id = razorpay_order['id']
             order.save()
+            send_order_email(order, order.user)
 
             context = {
                 'order': order,
@@ -149,6 +155,11 @@ def pay(request, order_id):
             order.payment_method = 'COD'
             order.is_paid = False
             order.save()
+            send_order_email(order, order.user)
+
+            cart_items = CartItem.objects.filter(cart__user=request.user)
+            cart_items.delete()
+            
             messages.success(request, "Order placed with Cash on Delivery.")
             return redirect('your_orders')
 
@@ -160,7 +171,6 @@ def your_orders(request):
     order = Order.objects.filter(user=request.user).order_by('-created_at')
     context = {
         'orders' : order,
-       
     }
     return render(request, 'orders/your_orders.html', context)
 
@@ -263,11 +273,24 @@ def cart_place_order(request):
         address = get_object_or_404(Address, id=address_id, user=request.user)
 
         total_calculated = sum(item.inventory.product.price * item.quantity for item in cart_items)
+        tax = 20
+        final_total = total_calculated + tax
+        discount = 0
+        
+        coupon_code = request.POST.get('coupon_code')
+        if coupon_code:
+            try:
+                final_total, discount, coupon = apply_coupon(request.user, final_total, coupon_code)
+                coupon.users_used.add(request.user)
+                messages.success(request, f'Coupon applied! You saved ₹{discount}')
+            except ValueError as e:
+                messages.error(request, str(e))
+                final_total = total_calculated + tax
 
         order = Order.objects.create(
             user = request.user,
             address = address,
-            total_price=total_calculated,
+            total_price=final_total,
             is_paid = False,
             order_status = 'Pending',
             payment_method = 'COD',
@@ -283,9 +306,27 @@ def cart_place_order(request):
 
             item.inventory.stock -= item.quantity
             item.inventory.save()
-        
-        cart_items.delete()
 
         return redirect('razorpay_payment', order_id=order.id)
     return redirect('cart')
  
+
+def apply_coupon_ajax(request):
+    cart = get_object_or_404(Cart, user=request.user)
+    cart_items = CartItem.objects.filter(cart=cart)
+    cart_total = sum(item.inventory.product.price * item.quantity for item in cart_items) + 20
+    coupon_code = request.POST.get('coupon_code', '').strip()
+
+    if not coupon_code:
+        return JsonResponse({'success' : False, 'message':'Please enter a coupon code.'})
+    
+    try:
+        final_total, discount, coupon = apply_coupon(request.user, cart_total, coupon_code)
+        return JsonResponse({
+            'success' : True,
+            'discount' : float(discount),
+            'final_total' : float(final_total),
+            'message' : f'Coupon applied! You saved ₹{discount}'
+        })
+    except ValueError as e:
+        return JsonResponse({'success' : False, 'message': str(e)})

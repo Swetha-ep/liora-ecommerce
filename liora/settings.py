@@ -139,3 +139,13 @@ RAZORPAY_KEY_ID = 'rzp_test_XbqRrCuWdW6OQf'
 RAZORPAY_KEY_SECRET = '4P0eqTBTPBUEo5Smr9vwET8O'
 
 LOGIN_URL = '/accounts/auth_page/'
+
+# settings.py
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "violet.store.she@gmail.com"      
+EMAIL_HOST_PASSWORD = "zmcg jcsw vtkk dedo"     
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

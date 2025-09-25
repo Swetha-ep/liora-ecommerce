@@ -62,7 +62,7 @@
                                                 <div>
                                                     <input type="number" class="qty-input"
                                                     style="width:56px; text-align:center; padding:2px 6px; font-size:14px"
-                                                    value="{{ item.quantity }}" min="1"
+                                                    value="{{ item.quantity }}" min="1" max="{{ item.inventory.stock }}"
                                                     data-update-url="{% url 'update_cart_quantity' item.id %}"
                                                     data-item-id="{{item.id}}">
                                                 </div>
@@ -183,10 +183,9 @@
                         
                         <div class="cart__discount">
                             <h6>Discount codes</h6>
-                            <form action="#">
-                                <input type="text" placeholder="Coupon code">
-                                <button type="submit">Apply</button>
-                            </form>
+                            <input type="text" id="coupon_code" name="coupon_code" placeholder="Enter coupon code">
+                            <button type="button" id="apply-coupon" class="btn btn-sm btn-outline-primary">Apply</button>
+                            <div id="coupon-message" class="mt-2"></div>
                         </div>
 
                         <div class="cart__total">
@@ -194,6 +193,9 @@
                             <ul>
                                 <li >Subtotal <span class="cart-total">₹ {{ cart.total_price }}</span></li>
                                 <li>Tax<span id="tax" data-tax="20">₹ 20</span></li>
+                                {% if discount %}
+                                <li>Discount: -₹ {{ discount }}</li>
+                                {% endif %}
                                 <ul class="checkout__total__all">
                                     <li>Total <span class="cart-grand-total">₹ {{ grand_total }}</span></li>
                                 </ul>
@@ -330,6 +332,57 @@
             }
         });
     </script>
+
+    <script>
+document.getElementById('apply-coupon').addEventListener('click', function() {
+    const couponCode = document.getElementById('coupon_code').value.trim();
+    const messageDiv = document.getElementById('coupon-message');
+
+    if (!couponCode) {
+        messageDiv.textContent = "Please enter a coupon code.";
+        messageDiv.className = "text-danger mt-2";
+        return;
+    }
+
+    fetch("{% url 'apply_coupon_ajax' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `coupon_code=${encodeURIComponent(couponCode)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            messageDiv.textContent = data.message;
+            messageDiv.className = "text-success mt-2";
+
+            // update totals
+            document.querySelector('.cart-grand-total').textContent = `₹ ${data.final_total.toFixed(2)}`;
+            if (!document.querySelector('.cart-discount-row')) {
+                // insert discount row
+                const ul = document.querySelector('.checkout__total__all');
+                const li = document.createElement('li');
+                li.className = "cart-discount-row";
+                li.innerHTML = `Discount:  <span id="discount-amount"> ₹ ${data.discount.toFixed(2)}</span>`;
+                ul.insertBefore(li, ul.firstChild);
+            } else {
+                document.getElementById('discount-amount').textContent = data.discount.toFixed(2);
+            }
+        } else {
+            messageDiv.textContent = data.message;
+            messageDiv.className = "text-danger mt-2";
+        }
+    })
+    .catch(error => {
+        console.error("Error applying coupon:", error);
+        messageDiv.textContent = "Something went wrong. Try again.";
+        messageDiv.className = "text-danger mt-2";
+    });
+});
+</script>
+
 
 
 {% endblock content%}

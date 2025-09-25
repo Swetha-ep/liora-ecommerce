@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from products.models import Product, Categories, Color, Size, Inventory
+from orders.models import Coupon
 
 class CategoryForm(ModelForm):
     class Meta:
@@ -55,3 +56,22 @@ class StockForm(forms.ModelForm):
         model = Inventory
         fields = '__all__'
         
+
+class CouponForm(forms.ModelForm):
+    class Meta:
+        model = Coupon
+        exclude = ['users_used']
+        widgets = {
+            'code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter coupon code'}),
+            'discount_amount': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter coupon amount'}),
+            'min_order_amount' : forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter minimum order amount'}),
+            'valid_from': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'  
+            }),
+            'valid_to': forms.DateTimeInput(attrs={
+                'class': 'form-control',
+                'type': 'datetime-local'
+            }),
+            'active': forms.CheckboxInput(attrs={'class': 'form-control'}),
+        }

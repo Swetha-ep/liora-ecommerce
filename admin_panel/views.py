@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from products.models import Product, Categories, Size, Color, Inventory
-from .forms import CategoryForm, ProductForm, ColorForm, SizeForm, StockForm
+from orders.models import Order, Coupon
+from .forms import CategoryForm, ProductForm, ColorForm, SizeForm, StockForm, CouponForm
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -192,3 +193,52 @@ def stock_delete(request, pk):
     stock.delete()
     return redirect('stock_list')
 
+
+# --------------------------order views-----------------------------
+#order list
+def order_list(request):
+    order = Order.objects.all().order_by('-created_at')
+    return render(request, 'order/order_list.html', {'order': order})
+
+
+# order status update
+def order_status_update(request, order_id):
+    order = get_object_or_404(Order,id=order_id)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('order_status')
+        order.order_status = new_status
+        order.save()
+    return redirect(request.META.get("HTTP_REFERER", "order_list"))
+
+
+# --------------------------coupon views-----------------------------
+# coupon list
+def coupon_list(request):
+    coupons = Coupon.objects.all()
+    return render(request, 'coupon/coupon_list.html', {'coupons' : coupons})
+
+
+# add coupon
+def add_coupon(request):
+    if request.method == 'POST':
+        form = CouponForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('coupon_list')
+    else:
+        form = CouponForm()
+    return render(request, 'coupon/add_coupon.html', {'form' : form})
+
+
+# edit coupon
+def edit_coupon(request, pk):
+    coupon = get_object_or_404(Coupon, id=pk)
+    if request.method == 'POST':
+        form = CouponForm(request.POST, instance=coupon)
+        if form.is_valid():
+            form.save()
+            return redirect('coupon_list')
+    else:
+        form = CouponForm(instance=coupon)
+    return render(request, 'coupon/add_coupon.html',{'form':form})
