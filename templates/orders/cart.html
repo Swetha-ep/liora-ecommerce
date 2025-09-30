@@ -258,8 +258,8 @@
         }
 
         document.querySelectorAll('.qty-input').forEach(input => {
-            input.addEventListener('input', updateQuantity);   // fires immediately
-            input.addEventListener('change', updateQuantity);  // fallback
+            input.addEventListener('input', updateQuantity);   
+            input.addEventListener('change', updateQuantity);  
         });
 
         const TAX = 20;

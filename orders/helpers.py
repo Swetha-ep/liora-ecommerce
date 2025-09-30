@@ -18,7 +18,7 @@ def send_order_email(order, user):
 
 
 
-def apply_coupon(user, cart_total, coupon_code):
+def apply_coupon(user, total_amount, coupon_code):
     try:
         coupon = Coupon.objects.get(code=coupon_code, active=True)
     except Coupon.DoesNotExist:
@@ -31,10 +31,10 @@ def apply_coupon(user, cart_total, coupon_code):
     if coupon.users_used.filter(id=user.id).exists():
         raise ValueError("You have already used this coupon")
     
-    if cart_total < coupon.min_order_amount:
+    if total_amount < coupon.min_order_amount:
         raise ValueError(f"Minimum order amount to use this coupon is ₹{coupon.min_order_amount}")
     
-    discount = min(coupon.discount_amount, cart_total)
-    final_total = cart_total - discount
+    discount = min(coupon.discount_amount, total_amount)
+    final_total = total_amount - discount
 
     return final_total, discount, coupon

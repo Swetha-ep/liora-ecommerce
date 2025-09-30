@@ -92,7 +92,7 @@
                         <div class="modal fade" id="deleteModal{{ coupon.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ coupon.id }}" aria-hidden="true">
                           <div class="modal-dialog">
                             <div class="modal-content">
-                              <form method="post" action="">
+                              <form method="post" action="{% url 'coupon_delete' coupon.id %}">
                                 {% csrf_token %}
                                 <div class="modal-header">
                                   <h5 class="modal-title" id="deleteModalLabel{{ coupon.id }}">Confirm Delete</h5>

@@ -242,3 +242,10 @@ def edit_coupon(request, pk):
     else:
         form = CouponForm(instance=coupon)
     return render(request, 'coupon/add_coupon.html',{'form':form})
+
+
+# delete coupon
+def coupon_delete(request, pk):
+    coupon = get_object_or_404(Coupon, id=pk)
+    coupon.delete()
+    return redirect('coupon_list')

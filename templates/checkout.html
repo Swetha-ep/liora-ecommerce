@@ -123,6 +123,14 @@
 
 
                         <div class="col-lg-6 col-md-7">
+
+                            <div class="cart__discount">
+                                <h6>Discount codes</h6>
+                                <input type="text" id="coupon_code" name="coupon_code" placeholder="Enter coupon code">
+                                <button type="button" id="apply-coupon" class="btn btn-sm btn-outline-primary">Apply</button>
+                                <div id="coupon-message" class="mt-2"></div>
+                            </div>
+
                             <div class="checkout__order">
                                 <h4 class="order__title">Your order</h4>
                                 <div class="checkout__order__products"><strong>Product </strong><span><strong>Total</strong></span></div>
@@ -130,25 +138,20 @@
                                     <li>{{inventory.product.name}} <span id="price" data-price="{{ inventory.product.price }}">₹ {{inventory.product.price}} * <span id="quantity" data-quantity="{{ quantity }}">{{quantity}}</span></span></li>
                                     
                                     <li>Tax<span id="tax" data-tax="20">₹ 20</span></li>
+                                    {% if discount %}
+                                        <li>Discount: -₹ {{ discount }}</li>
+                                    {% endif %}
                                 </ul>
                                 <ul class="checkout__total__all">
                                     <li><strong>Subtotal </strong><span id="subtotal">₹ 0.00</span></li>
                                     <li><strong>Total </strong><span id="total">₹ 0.00</span></li>
                                 </ul>
                                 
-                                
-                                <div class="checkout__input__checkbox">
-                                    <label for="payment">
-                                        Check Payment
-                                        <input type="checkbox" id="payment">
-                                        <span class="checkmark"></span>
-                                    </label>
-                                </div>
-      
                                 <input type="hidden" name="inventory_id" value="{{inventory.id}}">
                                 <input type="hidden" name="address_id" id="selectedAddressId">
                                 <input type="hidden" name="quantity" value="{{ quantity }}">
                                 <input type="hidden" name="total_price" id="totalPriceInput">
+                                <input type="hidden" name="coupon_code" id="couponCodeInput" value="">
                                 
                                 <button type="submit" class="site-btn">PLACE ORDER</button>
                                 
@@ -174,7 +177,8 @@
             const tax = parseFloat(document.getElementById('tax').dataset.tax);
 
             const subtotal = price * quantity;
-            const total = subtotal + tax;
+            const discount = 0;
+            const total = subtotal + tax - discount;
 
             document.getElementById('subtotal').textContent = `₹ ${subtotal.toFixed(2)}`;
             document.getElementById('total').textContent = `₹ ${total.toFixed(2)}`;
@@ -234,5 +238,63 @@
         });
     </script>
 
+    <script>
+        document.getElementById('apply-coupon').addEventListener('click', function () {
+        const code = document.getElementById('coupon_code').value.trim();
+        const price = parseFloat(document.getElementById('price').dataset.price);
+        const quantity = parseInt(document.getElementById('quantity').dataset.quantity);
+        const tax = parseFloat(document.getElementById('tax').dataset.tax);
+
+        const subtotal = price * quantity;
+        
+
+        fetch("{% url 'apply_coupon_buy_now_ajax' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: `coupon_code=${encodeURIComponent(code)}&subtotal=${subtotal}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            const msgDiv = document.getElementById('coupon-message');
+            if (data.success) {
+                msgDiv.innerHTML = `<span class="text-success">${data.message}</span>`;
+
+                const discount = data.discount;
+                const total = subtotal + tax - discount;
+
+                // Update subtotal (before discount, keep it raw)
+                document.getElementById('subtotal').textContent = `₹ ${subtotal.toFixed(2)}`;
+                document.getElementById('total').textContent = `₹ ${total.toFixed(2)}`;
+
+                // Update hidden input for backend
+                document.getElementById('totalPriceInput').value = total.toFixed(2);
+                document.getElementById('couponCodeInput').value = code; 
+
+                // Add/Update discount line
+                let discountLi = document.getElementById('discount-line');
+                if (!discountLi) {
+                    const ul = document.querySelector('.checkout__total__all');
+                    const li = document.createElement('li');
+                    li.id = 'discount-line';
+                    li.innerHTML = `Discount: <span id="discount-amount">₹ ${discount.toFixed(2)}</span>`;
+                    ul.insertBefore(li, ul.lastElementChild); // insert before Total
+                } else {
+                    document.getElementById('discount-amount').textContent = `₹ ${discount.toFixed(2)}`;
+                }
+            } else {
+                msgDiv.innerHTML = `<span class="text-danger">${data.message}</span>`;
+            }
+        })
+        .catch(err => {
+            console.error("Coupon apply error:", err);
+            msgDiv.textContent = 'Something went wrong. Try again.';
+            msgDiv.className = "text-danger mt-2";
+        });
+    });
+
+    </script>
 
 {% endblock content %}

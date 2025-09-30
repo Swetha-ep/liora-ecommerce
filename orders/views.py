@@ -11,7 +11,7 @@ import razorpay
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from orders.helper import send_order_email, apply_coupon
+from .helpers import send_order_email, apply_coupon
 
 
 def buy_now(request):
@@ -46,12 +46,43 @@ def buy_now(request):
         return redirect('index')
     
 
+def apply_coupon_buy_now_ajax(request):
+    if request.method != "POST":
+        return JsonResponse({'success': False, 'message': 'Invalid request.'})
+
+    subtotal = request.POST.get('subtotal')
+    coupon_code = request.POST.get('coupon_code', '').strip()
+
+    if not subtotal:
+        return JsonResponse({'success': False, 'message': 'Subtotal not provided.'})
+
+    try:
+        subtotal = Decimal(subtotal)
+    except Exception:
+        return JsonResponse({'success': False, 'message': 'Invalid subtotal.'})
+
+    if not coupon_code:
+        return JsonResponse({'success': False, 'message': 'Please enter a coupon code.'})
+
+    try:
+        final_total, discount, coupon = apply_coupon(request.user, subtotal, coupon_code)
+        return JsonResponse({
+            'success': True,
+            'discount': float(discount),
+            'final_total': float(final_total),
+            'message': f'Coupon applied! You saved ₹{discount}'
+        })
+    except ValueError as e:
+        return JsonResponse({'success': False, 'message': str(e)})
+    
+
 def place_order(request):
     if request.method == 'POST':
         inventory_id = request.POST.get('inventory_id')
         address_id = request.POST.get('address_id')
         quantity = int(request.POST.get('quantity'))
         total_price_submitted = Decimal(request.POST.get('total_price'))
+        coupon_code = request.POST.get('coupon_code', "").strip()
 
         try:
             inventory = Inventory.objects.get(id=inventory_id)
@@ -63,8 +94,20 @@ def place_order(request):
             return redirect('buy_now')
 
         subtotal = inventory.product.price * quantity
+       
+        if coupon_code:
+            try:
+                final_total, discount, coupon = apply_coupon(request.user, subtotal, coupon_code)
+                coupon.users_used.add(request.user)
+                messages.success(request, f'Coupon applied! You saved ₹{discount}')
+            except ValueError as e:
+                messages.error(request, str(e))
+                return redirect('buy_now')
+        else:
+            final_total = subtotal
+
         tax = Decimal(20)
-        total_calculated = (subtotal + tax).quantize(Decimal('0.01'))
+        total_calculated = (final_total + tax).quantize(Decimal('0.01'))
 
         if total_price_submitted != total_calculated:
             messages.error(request, "Payment amount mismatch. Please try again.")
@@ -88,7 +131,7 @@ def place_order(request):
 
         inventory.stock -= quantity
         inventory.save()
-        
+ 
         return redirect('razorpay_payment', order_id=order.id)
          
     messages.error(request, "Invalid request.")

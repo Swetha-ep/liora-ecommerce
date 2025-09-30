@@ -18,4 +18,5 @@ urlpatterns = [
     path('cart_place_order/', views.cart_place_order, name='cart_place_order'),
 
     path('apply-coupon/', views.apply_coupon_ajax, name='apply_coupon_ajax'),
+    path('apply-coupon-buy-now/', views.apply_coupon_buy_now_ajax, name='apply_coupon_buy_now_ajax'),
 ]
