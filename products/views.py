@@ -1,9 +1,11 @@
 from django.shortcuts import render, get_object_or_404
 from .models import *
+from admin_panel.models import Banner
 
 # Create your views here.
 def index(request):
-    return render(request,'index.html')
+    banners = Banner.objects.filter(is_active=True)
+    return render(request,'index.html',{'banners' : banners})
 
 def products(request, slug=None):
     if slug:

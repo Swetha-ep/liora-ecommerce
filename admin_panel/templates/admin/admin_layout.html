@@ -203,6 +203,27 @@
                   </ul>
                 </div>
               </li>
+              <li class="nav-item {% active_class 'banner_list' %} {% active_class 'add_banner' %}">
+                <a data-bs-toggle="collapse" href="#banner">
+                  <i class="fas fa-tag"></i>
+                  <p>Banner</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="banner">
+                  <ul class="nav nav-collapse">
+                    <li class="{% active_class 'banner_list' %}">
+                      <a href="{% url 'banner_list' %}">
+                        <span class="sub-item">Banners List </span>
+                      </a>
+                    </li>
+                    <li class="{% active_class 'add_banner' %}">
+                      <a href="{% url 'add_banner' %}">
+                        <span class="sub-item">Add Banner</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
             </ul>
           </div>
         </div>

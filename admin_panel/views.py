@@ -1,7 +1,8 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from products.models import Product, Categories, Size, Color, Inventory
 from orders.models import Order, Coupon
-from .forms import CategoryForm, ProductForm, ColorForm, SizeForm, StockForm, CouponForm
+from .models import Banner
+from .forms import CategoryForm, ProductForm, ColorForm, SizeForm, StockForm, CouponForm, BannerForm
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -249,3 +250,42 @@ def coupon_delete(request, pk):
     coupon = get_object_or_404(Coupon, id=pk)
     coupon.delete()
     return redirect('coupon_list')
+
+
+# --------------------------banner views-----------------------------
+# add banner
+def add_banner(request):
+    if request.method == 'POST':
+        form = BannerForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('banner_list')
+    else:
+        form = BannerForm()
+    return render(request, 'banner/add_banner.html',{'form':form})
+
+
+# edit banner
+def edit_banner(request,pk):
+    banner = get_object_or_404(Banner, id=pk)
+    if request.method=='POST':
+        form = BannerForm(request.POST,request.FILES,instance=banner)
+        if form.is_valid():
+            form.save()
+            return redirect('banner_list')
+    else:
+        form=BannerForm(instance=banner)
+    return render(request, 'banner/add_banner.html', {'form':form})
+
+
+# banner list
+def banner_list(request):
+    banners = Banner.objects.all()
+    return render(request, 'banner/banner_list.html',{'banners':banners})
+
+
+# delete banner
+def banner_delete(request,pk):
+    banner = get_object_or_404(Banner, id=pk)
+    banner.delete()
+    return redirect('banner_list')

@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import ModelForm
 from products.models import Product, Categories, Color, Size, Inventory
+from .models import Banner
 from orders.models import Coupon
 
 class CategoryForm(ModelForm):
@@ -74,4 +75,16 @@ class CouponForm(forms.ModelForm):
                 'type': 'datetime-local'
             }),
             'active': forms.CheckboxInput(attrs={'class': 'form-control'}),
+        }
+
+
+class BannerForm(forms.ModelForm):
+    class Meta:
+        model = Banner
+        fields = '__all__'
+        widgets = {
+            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter caption'}),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter title'}),
+            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter description'}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control-file', 'onchange': 'previewImage(event)'}),
         }

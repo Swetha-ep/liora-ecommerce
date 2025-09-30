@@ -1,0 +1,109 @@
+{% extends "admin/admin_layout.html" %}
+  {% load static %}
+  {% block title %}L I O R A | {% if heading %}{{ heading }}{% else %}Add Banner{% endif %}{% endblock %}
+  {% block admin_content %} 
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">
+                {% if heading %}
+                    {{ heading }}
+                {% else %}
+                  Banner
+                {% endif %}
+              </h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">
+                    {% if heading %}
+                        {{ heading }}
+                    {% else %}
+                      Banner
+                    {% endif %}
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">
+                    {% if heading %}
+                        {{ heading }}
+                    {% else %}
+                      Banner
+                    {% endif %}
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      {% if heading %}
+                          {{ heading }}
+                      {% else %}
+                        Banner
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    
+                    <!--Form-->
+                    <form method="POST" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      {{ form.as_p }}
+                      {% if form.instance and form.instance.image %}
+                        <div>
+                            <p>Current Image:</p>
+                            <img id="image-preview" src="{{ form.instance.image.url }}" alt="Current Image" style="max-height: 200px; margin-bottom: 10px;">
+                        </div>
+                      {% else %}
+                        <div>
+                            <img id="image-preview" src="#" alt="Image Preview" style="display: none; max-height: 200px; margin-bottom: 10px;">
+                        </div>
+                      {% endif %}
+                      <div class="card-action">
+                        <button class="btn btn-success" type= "submit">Submit</button>
+                      </div>
+                    </form>
+                    <!--End Form-->
+
+                  </div>
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          function previewImage(event) {
+              const input = event.target;
+              const preview = document.getElementById('image-preview');
+
+              if (input.files && input.files[0]) {
+                  const reader = new FileReader();
+
+                  reader.onload = function(e) {
+                      preview.src = e.target.result;
+                      preview.style.display = 'block';
+                  }
+
+                  reader.readAsDataURL(input.files[0]);
+              } else {
+                  preview.src = '#';
+                  preview.style.display = 'none';
+              }
+          }
+        </script>
+  {% endblock admin_content %}
