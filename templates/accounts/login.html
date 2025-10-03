@@ -50,7 +50,7 @@
             {% endif %}
 			<input type="text" name="username" placeholder="Name" value="{{ signin_data.username|default:'' }}"/>
 			<input type="password" name="password" placeholder="Password" />
-			<a href="#">Forgot your password?</a>
+			<a href="{% url 'forgot_password' %}">Forgot your password?</a>
 			<button type="submit" name="signin_submit">Sign In</button>
 		</form>
 	</div>

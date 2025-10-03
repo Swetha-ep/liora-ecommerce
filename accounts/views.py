@@ -1,9 +1,17 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.utils.crypto import get_random_string
+from django.conf import settings
+from .models import PasswordResetToken
+from django.utils import timezone
+from datetime import timedelta
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 from accounts.models import Address
 from .forms import AddressForm
+from django.urls import reverse
 
 # Create your views here.
 
@@ -89,3 +97,61 @@ def add_address(request):
     else:
         messages.error(request, 'Something went error. Try again')
     return render(request,'accounts/profile.html')
+
+
+
+def forgot_password(request):
+    if request.method=='POST':
+        email = request.POST.get('email')
+        try:
+            user  = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(request,'User not found!')
+            return redirect('forgot_password')
+        
+        token = get_random_string(32)
+        expiry = timezone.now() + timedelta(minutes=30)
+
+        PasswordResetToken.objects.create(user=user, token=token, expiry=expiry)
+
+        reset_link = request.build_absolute_uri(reverse("reset_password", args=[token]))
+        send_mail(
+            subject= "Reset your password - Liora",
+            message=f"Hi {user.username},\n\nClick here to reset your password:\n{reset_link}\n\nThis link will expire in 30 minutes.",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+        )
+        messages.success(request, "Password reset link sent to your email.")
+        return redirect('auth_login')
+
+    return render(request, "accounts/forgot_password.html")
+
+
+def reset_password(request,token):
+    try:
+        reset_token = PasswordResetToken.objects.get(token=token)
+    except PasswordResetToken.DoesNotExist:
+        messages.error(request, "Invalid reset link")
+        return redirect("forgot_password")
+    
+    if not reset_token.is_valid():
+        messages.error(request,"Reset link expired")
+        return redirect("forgot_password")
+    
+    if request.method == 'POST':
+        new_password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if new_password != confirm_password:
+            messages.error(request,"Passwords do not match")
+            return redirect("reset_password", token=token)
+        
+        user = reset_token.user
+        user.password = make_password(new_password)
+        user.save()
+
+        reset_token.delete()
+        messages.success(request, "Password reset successfully! You can login now")
+        return redirect("auth_login")
+    
+    return render(request, "accounts/reset_password.html", {'token':token})
