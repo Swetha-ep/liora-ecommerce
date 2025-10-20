@@ -12,7 +12,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from .helpers import send_order_email, apply_coupon
-
+from products.helper import get_product_offer_details
 
 def buy_now(request):
     addresses = Address.objects.filter(user=request.user)
@@ -33,11 +33,23 @@ def buy_now(request):
             messages.error(request, "Invalid product selection.")
             return redirect('index')
         
+        offer_data = get_product_offer_details(inventory.product)
+        discounted_price = offer_data['discounted_price']
+        offer = offer_data['offer']
+        savings = offer_data['savings']
+
+        quantity = int(quantity)
+        total_price = discounted_price * quantity
+
+        
         context = {
             'inventory' : inventory,
             'quantity' : quantity,
             'addresses' : addresses,
-            
+            'discounted_price': discounted_price,
+            'offer': offer,
+            'savings': savings,
+            'total_price': total_price,
         }
         return render(request, 'checkout.html', context)
 
@@ -93,7 +105,10 @@ def place_order(request):
             messages.error(request, "Invalid input.")
             return redirect('buy_now')
 
-        subtotal = inventory.product.price * quantity
+        offer_data = get_product_offer_details(inventory.product)
+        price_to_use = offer_data['discounted_price'] or inventory.product.price
+        subtotal = price_to_use * quantity
+
        
         if coupon_code:
             try:
@@ -254,6 +269,15 @@ def add_to_cart(request):
 def cart(request):
     addresses = Address.objects.filter(user=request.user)
     cart = (Cart.objects.filter(user=request.user).prefetch_related('items__inventory__product').first())
+
+    if cart:
+        for item in cart.items.all():
+            product = item.inventory.product
+            offer_data = get_product_offer_details(product)
+            item.discounted_price = offer_data['discounted_price']
+            item.savings = offer_data['savings']
+            subtotal = item.quantity * item.discounted_price
+
     context = {
         'cart' : cart,
         'addresses' : addresses,
@@ -270,20 +294,18 @@ def update_cart_quantity(request, item_id):
             cart_item.quantity = quantity
             cart_item.save()
 
-            row_total = cart_item.quantity * cart_item.inventory.product.price
-            cart_total = sum(
-                i.quantity * i.inventory.product.price for i in cart_item.cart.items.all()
-            )
+            row_total = cart_item.subtotal 
+            cart_total = cart_item.cart.total_price
 
-            tax = 20
+            tax = Decimal(20)
             grand_total = cart_total + tax
 
             return JsonResponse({
                 "success": True,
-                "row_total": row_total,
-                "cart_total": cart_total,
-                "tax": str(tax),
-                "grand_total": str(grand_total),
+                "row_total": f"{row_total:.2f}",
+                "cart_total": f"{cart_total:.2f}",
+                "tax": f"{tax:.2f}",
+                "grand_total": f"{grand_total:.2f}",
             })
 
         except CartItem.DoesNotExist:
@@ -315,8 +337,13 @@ def cart_place_order(request):
 
         address = get_object_or_404(Address, id=address_id, user=request.user)
 
-        total_calculated = sum(item.inventory.product.price * item.quantity for item in cart_items)
-        tax = 20
+        total_calculated = sum(
+            item.quantity * get_product_offer_details(item.inventory.product)['discounted_price']
+            for item in cart_items
+        )
+
+        
+        tax = Decimal(20)
         final_total = total_calculated + tax
         discount = 0
         
@@ -340,11 +367,14 @@ def cart_place_order(request):
         )
 
         for item in cart_items:
+            product = item.inventory.product
+            discounted_price = get_product_offer_details(product)['discounted_price']
+            
             OrderItem.objects.create(
                 order=order,
                 inventory=item.inventory,
                 quantity=item.quantity,
-                price=item.inventory.product.price * item.quantity 
+                price=discounted_price * item.quantity 
             )
 
             item.inventory.stock -= item.quantity

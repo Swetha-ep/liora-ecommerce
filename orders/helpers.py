@@ -38,3 +38,5 @@ def apply_coupon(user, total_amount, coupon_code):
     final_total = total_amount - discount
 
     return final_total, discount, coupon
+
+

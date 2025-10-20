@@ -28,12 +28,14 @@
             <div class="row">
                 <div class="col-lg-3">
                     <div class="shop__sidebar">
+
                         <div class="shop__sidebar__search">
-                            <form action="#">
-                                <input type="text" placeholder="Search...">
+                            <form method="get" action="{% if category %}{% url 'products' category.slug %}{% else %}{% url 'products' 'all' %}{% endif %}">
+                                <input type="text" name="q" placeholder="Search..."  value="{{ request.GET.q|default:'' }}">
                                 <button type="submit"><span class="icon_search"></span></button>
                             </form>
                         </div>
+
                         <div class="shop__sidebar__accordion">
                             <div class="accordion" id="accordionExample">
                                 <div class="card">
@@ -52,27 +54,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div class="card">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseThree">Filter Price</a>
-                                    </div>
-                                    <div id="collapseThree" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__price">
-                                                <ul>
-                                                    <li><a href="#">$0.00 - $50.00</a></li>
-                                                    <li><a href="#">$50.00 - $100.00</a></li>
-                                                    <li><a href="#">$100.00 - $150.00</a></li>
-                                                    <li><a href="#">$150.00 - $200.00</a></li>
-                                                    <li><a href="#">$200.00 - $250.00</a></li>
-                                                    <li><a href="#">250.00+</a></li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
                             </div>
                         </div>
                     </div>
@@ -82,17 +63,22 @@
                         <div class="row">
                             <div class="col-lg-6 col-md-6 col-sm-6">
                                 <div class="shop__product__option__left">
-                                    <p>Showing 1–12 of 126 results</p>
+                                    <p>
+                                        Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} results
+                                    </p>
                                 </div>
                             </div>
                             <div class="col-lg-6 col-md-6 col-sm-6">
                                 <div class="shop__product__option__right">
-                                    <p>Sort by Price:</p>
-                                    <select>
-                                        <option value="">Low To High</option>
-                                        <option value="">$0 - $55</option>
-                                        <option value="">$55 - $100</option>
-                                    </select>
+                                    <form method='get' id='sortForm'>
+                                        <p>Sort by Price:</p>
+                                            <select name="sort" onchange="document.getElementById('sortForm').submit()">
+                                                <option value="">Default</option>
+                                                <option value="low" {% if request.GET.sort == 'low' %}selected{% endif %}>Low to High</option>
+                                                <option value="high" {% if request.GET.sort == 'high' %}selected{% endif %}>High to Low</option>
+                                            </select>
+                                        </p>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -111,22 +97,19 @@
                                         {% endif %}
                                                 <ul class="product__hover">
                                                     <li><a href="#"><img src="{% static 'img/icon/heart.png' %}" alt=""></a></li>
-                                                    <li><a href="#"><img src="{% static 'img/icon/compare.png' %}" alt=""></a></li>
-                                                    <li><a href="#"><img src="{% static 'img/icon/search.png' %}" alt=""></a></li>
                                                 </ul>
                                             </div>
                                     {% endwith %}
                                     <div class="product__item__text">
                                         <h6>{{item.name}}</h6>
                                         <a href="{% url 'product_view' item.slug %}?color={{item.inventories.first.color.id}}" class="add-cart">View</a>
-                                        <div class="rating">
-                                            <i class="fa fa-star-o"></i>
-                                            <i class="fa fa-star-o"></i>
-                                            <i class="fa fa-star-o"></i>
-                                            <i class="fa fa-star-o"></i>
-                                            <i class="fa fa-star-o"></i>
-                                        </div>
-                                        <h5>₹ {{item.price}}</h5>
+                                        
+                                        {% if item.discounted_price %}
+                                            <h5 class="original-price text-muted mb-1"><del>₹{{ item.price }}</del></h5>
+                                            <h5 class="discounted-price text-danger fw-bold mb-2">₹{{ item.discounted_price|floatformat:2 }}</h5>
+                                        {% else %}
+                                            <h5>₹ {{item.price}}</h5>
+                                        {% endif %}
                                         <div class="product__color__select">
                                             <label for="pc-4">
                                                 <input type="radio" id="pc-4">
@@ -146,11 +129,27 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="product__pagination">
-                                <a class="active" href="#">1</a>
-                                <a href="#">2</a>
-                                <a href="#">3</a>
-                                <span>...</span>
-                                <a href="#">21</a>
+
+                                {% if page_obj.has_previous %}
+
+                                    <a href="?page={{ page_obj.previous_page_number }}&sort={{ request.GET.sort }}&q={{ request.GET.q }}">
+                                        <i class="fa fa-angle-left"></i>
+                                    </a>
+                                {% endif %}
+
+                                {% for num in page_obj.paginator.page_range %}
+                                    <a href="?page={{ num }}&sort={{ request.GET.sort }}&q={{ request.GET.q }}" 
+                                        class="{% if page_obj.number == num %}active{% endif %}">
+                                        {{ num }}
+                                    </a>
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}&sort={{ request.GET.sort }}&q={{ request.GET.q }}">
+                                        <i class="fa fa-angle-right"></i>
+                                    </a>
+                                {% endif %}
+
                             </div>
                         </div>
                     </div>

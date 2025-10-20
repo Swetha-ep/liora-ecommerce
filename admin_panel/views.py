@@ -1,17 +1,145 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from products.models import Product, Categories, Size, Color, Inventory
-from orders.models import Order, Coupon
+from products.models import Product, Categories, Size, Color, Inventory, Offer
+from orders.models import Order, Coupon, OrderItem
 from .models import Banner
-from .forms import CategoryForm, ProductForm, ColorForm, SizeForm, StockForm, CouponForm, BannerForm
+from .forms import CategoryForm, ProductForm, ColorForm, SizeForm, StockForm, CouponForm, BannerForm, OfferForm
 from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from django.db.models.functions import TruncMonth
+from django.db.models import Count, Sum
+from django.contrib.auth.models import User
+from django.http import HttpResponse
+import datetime
+from django.utils import timezone
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.units import cm
+from reportlab.pdfgen import canvas
 
 # dashboard view
 def dashboard(request):
-    return render(request, 'admin/dashboard.html')
+    # Total users
+    total_users = User.objects.count()
+
+    # Total orders
+    total_orders = Order.objects.count()
+
+    # Total sales amount
+    total_sales = Order.objects.aggregate(total=Sum('total_price'))['total'] or 0
+    data = (
+        Order.objects.annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(order_count=Count('id'))
+        .order_by('month')
+    )
+
+    labels = [d['month'].strftime('%b %Y') for d in data]
+    values = [d['order_count'] for d in data]
+
+    context = {
+        'total_users': total_users,
+        'total_orders': total_orders,
+        'total_sales': total_sales,
+        'labels': labels,
+        'values': values,
+    }
+    return render(request, 'admin/dashboard.html', context)
 
 
+def sales_report_pdf(request):
+    # 🧮 Summary
+    total_users = User.objects.count()
+    total_orders = Order.objects.count()
+    total_sales = Order.objects.aggregate(total=Sum('total_price'))['total'] or 0
+
+    # 📅 Monthly Data
+    monthly_data = (
+        Order.objects.annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(order_count=Count('id'), sales=Sum('total_price'))
+        .order_by('month')
+    )
+
+    # 🏆 Top Products
+    top_products = (
+        OrderItem.objects.values('inventory__product__name')
+        .annotate(total_qty=Sum('quantity'), total_sales=Sum('price'))
+        .order_by('-total_qty')[:5]
+    )
+
+    # 📄 PDF Setup
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="sales_report_{datetime.date.today()}.pdf"'
+
+    doc = SimpleDocTemplate(response, pagesize=A4)
+    elements = []
+    styles = getSampleStyleSheet()
+
+    # 🧾 Title
+    title = Paragraph("<b>Liora — Sales Report</b>", styles['Title'])
+    subtitle = Paragraph(f"Generated on: {datetime.datetime.now().strftime('%d %B %Y, %I:%M %p')}", styles['Normal'])
+    elements.extend([title, subtitle, Spacer(1, 12)])
+
+    # 📊 Summary Table
+    summary_data = [
+        ['Total Users', 'Total Orders', 'Total Sales (₹)'],
+        [str(total_users), str(total_orders), f"₹{total_sales}"],
+    ]
+    summary_table = Table(summary_data, colWidths=[150, 150, 150])
+    summary_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+    ]))
+    elements.extend([Paragraph("<b>Summary</b>", styles['Heading2']), summary_table, Spacer(1, 20)])
+
+    # 📅 Monthly Sales Table
+    monthly_table_data = [['Month', 'Orders', 'Sales (₹)']]
+    for m in monthly_data:
+        monthly_table_data.append([
+            m['month'].strftime('%B %Y'),
+            str(m['order_count']),
+            f"₹{m['sales'] or 0}"
+        ])
+    monthly_table = Table(monthly_table_data, colWidths=[200, 100, 150])
+    monthly_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.darkblue),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+    ]))
+    elements.extend([Paragraph("<b>Monthly Sales Breakdown</b>", styles['Heading2']), monthly_table, Spacer(1, 20)])
+
+    # 🏆 Top Products Table
+    product_table_data = [['Product Name', 'Quantity Sold', 'Total Sales (₹)']]
+    for p in top_products:
+        product_table_data.append([
+            p['inventory__product__name'] or 'N/A',
+            str(p['total_qty']),
+            f"₹{p['total_sales'] or 0}"
+        ])
+    product_table = Table(product_table_data, colWidths=[200, 100, 150])
+    product_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.darkgreen),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+    ]))
+    elements.extend([Paragraph("<b>Top 5 Best-Selling Products</b>", styles['Heading2']), product_table])
+
+    # ✅ Build PDF
+    doc.build(elements)
+    return response
 
 # --------------------------category views-----------------------------
 
@@ -289,3 +417,37 @@ def banner_delete(request,pk):
     banner = get_object_or_404(Banner, id=pk)
     banner.delete()
     return redirect('banner_list')
+
+
+# --------------------------offer views-----------------------------
+
+#--->- Class Based Views -<---
+
+# offer list
+class OfferList(ListView):
+    model = Offer
+    template_name = 'offer/offer_list.html'
+    context_object_name = 'offers'
+
+
+# add offer
+class OfferCreate(CreateView):
+    model = Offer
+    success_url = reverse_lazy('offer_list')
+    template_name = 'offer/add_offer.html'
+    form_class = OfferForm
+
+
+# edit offer
+class OfferUpdate(UpdateView):
+    model = Offer
+    success_url = reverse_lazy('offer_list')
+    template_name = 'offer/add_offer.html'
+    form_class = OfferForm
+
+
+# delete offer
+class OfferDelete(DeleteView):
+    model = Offer
+    context_object_name = 'offer'
+    success_url = reverse_lazy('offer_list')

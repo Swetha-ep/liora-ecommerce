@@ -38,7 +38,18 @@
                                 <i class="fa fa-star-o"></i>
                                 <span> - 5 Reviews</span>
                             </div>
-                            <h3>₹ {{product.price}} <span>70.00</span></h3>
+
+                            {% if discounted_price %}
+                                <h3>₹ {{discounted_price|floatformat:2 }} <span>₹ {{product.price}}</span></h3>
+                                {% if savings and savings > 0 %}
+                                    <p class="text-success fw-semibold">
+                                        You save ₹{{ savings|floatformat:2 }}!
+                                    </p>
+                                {% endif %}
+                            {% else %}   
+                                <h3>₹ {{product.price}}</h3>
+                            {% endif %}
+
                             <p>{{product.description}}</p>
                             <form method="POST" id="product_details_form" action="{% url 'buy_now' %}">
                                 {% csrf_token %}
@@ -100,9 +111,20 @@
                                 </div>
                             </form>
                             <div class="product__details__btns__option">
-                                <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
-                                
-                                
+                                <form method="POST" action="{% url 'add_to_wishlist' %}" id="wishlist-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                                    <input type="hidden" name="color_id" value="{{ selected_color.id }}">
+                                    {% if wishlisted %}
+                                        <button class="btn btn-danger" disabled>
+                                            <i class="fa fa-heart"></i> Wishlisted
+                                        </button>
+                                    {% else %}
+                                    <button type="submit" class="btn btn-link p-0 wishlist-btn">
+                                        <i class="fa fa-heart"></i> add to wishlist
+                                    </button>
+                                    {% endif %}
+                                </form>
                             </div>
 
 

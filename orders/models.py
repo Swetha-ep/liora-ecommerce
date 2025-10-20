@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from products.models import Inventory
 from accounts.models import Address
 from django.conf import settings
+from products.helper import get_product_offer_details
 # Create your models here.
 
 class Order(models.Model):
@@ -38,6 +39,12 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f'{self.inventory.product.name} - ({self.quantity})'
+    
+    @property
+    def subtotal(self):
+        offer_details = get_product_offer_details(self.inventory.product)
+        discounted_price = offer_details['discounted_price']
+        return discounted_price * self.quantity
 
 
 class Cart(models.Model):
@@ -47,8 +54,9 @@ class Cart(models.Model):
     def __str__(self):
         return f"Cart - {self.user.username}"
     
+    @property
     def total_price(self):
-        return sum(item.subtotal() for item in self.items.all())
+        return sum(item.subtotal for item in self.items.all())
     
 
 class CartItem(models.Model):
@@ -59,9 +67,11 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.inventory.product.name} - {self.quantity}"
     
+    @property
     def subtotal(self):
-        return self.inventory.product.price * self.quantity
-
+        offer_details = get_product_offer_details(self.inventory.product)
+        discounted_price = offer_details['discounted_price']
+        return discounted_price * self.quantity
 
 
 class Coupon(models.Model):

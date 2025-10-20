@@ -135,7 +135,30 @@
                                 <h4 class="order__title">Your order</h4>
                                 <div class="checkout__order__products"><strong>Product </strong><span><strong>Total</strong></span></div>
                                 <ul class="checkout__total__products">
-                                    <li>{{inventory.product.name}} <span id="price" data-price="{{ inventory.product.price }}">₹ {{inventory.product.price}} * <span id="quantity" data-quantity="{{ quantity }}">{{quantity}}</span></span></li>
+                                    <li>{{inventory.product.name}} 
+
+                                        {% if discounted_price %}
+                                            <p class="text-muted">
+                                                <del>₹{{ inventory.product.price }}</del>
+                                            </p>
+                                            <span id="price" data-price="{{ discounted_price }}">
+                                                ₹ {{discounted_price }} * 
+                                                <span id="quantity" data-quantity="{{ quantity }}">
+                                                    {{quantity}}
+                                                </span>
+                                            </span>
+                                            <p class="text-info">
+                                                You save ₹{{ savings }}!
+                                            </p>
+                                        {% else %}
+                                            <span id="price" data-price="{{ inventory.product.price }}">
+                                                ₹ {{inventory.product.price}} * 
+                                                <span id="quantity" data-quantity="{{ quantity }}">
+                                                    {{quantity}}
+                                                </span>
+                                            </span>
+                                        {% endif %}
+                                    </li>
                                     
                                     <li>Tax<span id="tax" data-tax="20">₹ 20</span></li>
                                     {% if discount %}

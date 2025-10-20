@@ -1,0 +1,155 @@
+{% extends "admin/admin_layout.html" %}
+  {% load static %}
+  {% load crispy_forms_tags %}
+  {% block title %}L I O R A | {% if heading %}{{ heading }}{% else %}Add Offer{% endif %}{% endblock %}
+  {% block admin_content %} 
+        <div class="container">
+          <div class="page-inner">
+            <div class="page-header">
+              <h3 class="fw-bold mb-3">
+                {% if heading %}
+                    {{ heading }}
+                {% else %}
+                  Offer
+                {% endif %}
+              </h3>
+              <ul class="breadcrumbs mb-3">
+                <li class="nav-home">
+                  <a href="#">
+                    <i class="icon-home"></i>
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">
+                    {% if heading %}
+                        {{ heading }}
+                    {% else %}
+                      Offers
+                    {% endif %}
+                  </a>
+                </li>
+                <li class="separator">
+                  <i class="icon-arrow-right"></i>
+                </li>
+                <li class="nav-item">
+                  <a href="#">
+                    {% if heading %}
+                        {{ heading }}
+                    {% else %}
+                      Offer
+                    {% endif %}
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title">
+                      {% if heading %}
+                          {{ heading }}
+                      {% else %}
+                        Offer
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="card-body">
+                    <!--Form-->
+                    <form method="POST" enctype="multipart/form-data">
+                      {% csrf_token %}
+                      
+                      {{ form.name|as_crispy_field }}
+                      {{ form.description|as_crispy_field }}
+                      {{ form.image|as_crispy_field }}
+                      {{ form.category|as_crispy_field }}
+                      {{ form.min_order_value|as_crispy_field }}
+                      {{ form.active|as_crispy_field }}
+
+
+                      {% if form.instance and form.instance.image %}
+                        <div>
+                            <p>Current Image:</p>
+                            <img id="image-preview" src="{{ form.instance.image.url }}" alt="Current Image" style="max-height: 200px; margin-bottom: 10px;">
+                        </div>
+                      {% else %}
+                        <div>
+                            <img id="image-preview" src="#" alt="Image Preview" style="display: none; max-height: 200px; margin-bottom: 10px;">
+                        </div>
+                      {% endif %} 
+
+                      <div class="form-group">
+                          <label for="id_discount_type">Discount Type</label>
+                          {{ form.discount_type }}
+                      </div>
+
+                      <div class="form-group">
+                          <label for="id_discount_value">Discount Value</label>
+                          <div class="input-group">
+                              <span class="input-group-text" id="symbol-addon">₹</span>
+                              {{ form.discount_value }}
+                          </div>
+                          {% if form.discount_value.errors %}
+                              <div class="invalid-feedback d-block">
+                                  {{ form.discount_value.errors|join:", " }}
+                              </div>
+                          {% endif %}
+                      </div>
+
+                      <div class="card-action">
+                        <button class="btn btn-success" type= "submit">Submit</button>
+                      </div>
+                    </form>
+                    <!--End Form-->
+                  </div> 
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script>
+          function previewImage(event) {
+              const input = event.target;
+              const preview = document.getElementById('image-preview');
+
+              if (input.files && input.files[0]) {
+                  const reader = new FileReader();
+
+                  reader.onload = function(e) {
+                      preview.src = e.target.result;
+                      preview.style.display = 'block';
+                  }
+
+                  reader.readAsDataURL(input.files[0]);
+              } else {
+                  preview.src = '#';
+                  preview.style.display = 'none';
+              }
+          }
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const discountType = document.getElementById('id_discount_type');
+                const symbolAddon = document.getElementById('symbol-addon');
+
+                function updateSymbol() {
+                    if (discountType.value === 'percent') {
+                        symbolAddon.textContent = '%';
+                    } else {
+                        symbolAddon.textContent = '₹';
+                    }
+                }
+
+                // Set symbol on load
+                updateSymbol();
+
+                // Update symbol dynamically when type changes
+                discountType.addEventListener('change', updateSymbol);
+            });
+        </script>
+        
+
+  {% endblock admin_content %}

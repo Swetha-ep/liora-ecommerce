@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm
-from products.models import Product, Categories, Color, Size, Inventory
+from products.models import Product, Categories, Color, Size, Inventory, Offer
 from .models import Banner
 from orders.models import Coupon
 
@@ -88,3 +88,32 @@ class BannerForm(forms.ModelForm):
             'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter description'}),
             'image': forms.ClearableFileInput(attrs={'class': 'form-control-file', 'onchange': 'previewImage(event)'}),
         }
+
+
+
+class OfferForm(forms.ModelForm):
+    class Meta:
+        model = Offer
+        exclude = ['min_order_value']
+        widgets = {
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control-file', 'onchange': 'previewImage(event)'}),
+        }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.discount_type == 'percent':
+            self.fields['discount_value'].label = "Discount Percentage (%)"
+        else:
+            self.fields['discount_value'].label = "Discount Amount (₹)"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        discount_type = cleaned_data.get('discount_type')
+        discount_value = cleaned_data.get('discount_value')
+
+        if discount_type == 'percent' and discount_value > 100:
+            self.add_error('discount_value', 'Percentage discount cannot exceed 100%.')
+        elif discount_value <= 0:
+            self.add_error('discount_value', 'Discount value must be greater than 0.')
+        return cleaned_data

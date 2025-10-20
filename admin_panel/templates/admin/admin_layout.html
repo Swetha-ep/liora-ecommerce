@@ -205,7 +205,7 @@
               </li>
               <li class="nav-item {% active_class 'banner_list' %} {% active_class 'add_banner' %}">
                 <a data-bs-toggle="collapse" href="#banner">
-                  <i class="fas fa-tag"></i>
+                  <i class="fas fa-picture"></i>
                   <p>Banner</p>
                   <span class="caret"></span>
                 </a>
@@ -219,6 +219,27 @@
                     <li class="{% active_class 'add_banner' %}">
                       <a href="{% url 'add_banner' %}">
                         <span class="sub-item">Add Banner</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <li class="nav-item {% active_class 'offer_list' %} {% active_class 'add_offer' %}">
+                <a data-bs-toggle="collapse" href="#offer">
+                  <i class="fas fa-tag"></i>
+                  <p>Offer</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="offer">
+                  <ul class="nav nav-collapse">
+                    <li class="{% active_class 'offer_list' %}">
+                      <a href="{% url 'offer_list' %}">
+                        <span class="sub-item">Offers List </span>
+                      </a>
+                    </li>
+                    <li class="{% active_class 'add_offer' %}">
+                      <a href="{% url 'add_offer' %}">
+                        <span class="sub-item">Add Offer</span>
                       </a>
                     </li>
                   </ul>
@@ -616,32 +637,10 @@
         {% block admin_content %}
         {% endblock admin_content %}
 
-        <footer class="footer">
-          <div class="container-fluid d-flex justify-content-between">
-            <nav class="pull-left">
-              <ul class="nav">
-                <li class="nav-item">
-                  <a class="nav-link" href="http://www.themekita.com">
-                    ThemeKita
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#"> Help </a>
-                </li>
-                <li class="nav-item">
-                  <a class="nav-link" href="#"> Licenses </a>
-                </li>
-              </ul>
-            </nav>
-            <div class="copyright">
-              2024, made with <i class="fa fa-heart heart text-danger"></i> by
-              <a href="http://www.themekita.com">ThemeKita</a>
-            </div>
-            <div>
-              Distributed by
-              <a target="_blank" href="https://themewagon.com/">ThemeWagon</a>.
-            </div>
-          </div>
+        <footer class="footer" style="background-color: #f8f9fa; height: 60px; display: flex; align-items: center; justify-content: center;">
+            
+                <span style="color: #6c757d;">© 2025 Liora</span>
+            
         </footer>
       </div>
     </div>

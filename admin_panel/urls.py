@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('',views.dashboard,name='dashboard'),
+    path('dashboard/sales-report/', views.sales_report_pdf, name='sales_report_pdf'),
     
     path('products_list/', views.products_list, name='products_list'),
     path('add_products/', views.add_products, name='add_products'),
@@ -37,4 +38,9 @@ urlpatterns = [
     path('add_banner/',views.add_banner, name='add_banner'),
     path('edit_banner/<pk>/', views.edit_banner, name='edit_banner'),
     path('banner_delete/<pk>/', views.banner_delete, name='banner_delete'),
+
+    path('offer_list/', views.OfferList.as_view(), name='offer_list'),
+    path('add_offer/', views.OfferCreate.as_view(), name='add_offer'),
+    path('edit_offer/<pk>/', views.OfferUpdate.as_view(), name='edit_offer'),
+    path('delete_offer/<pk>/', views.OfferDelete.as_view(), name='delete_offer'),
 ]

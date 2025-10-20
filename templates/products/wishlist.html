@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}L I O R A | Cart{% endblock %}
+{% block content %}
+    
+
+    
+    <!-- Header Section End -->
+
+    <!-- Breadcrumb Section Begin -->
+    <section class="breadcrumb-option">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="breadcrumb__text">
+                        <h4>wishlist</h4>
+                        <div class="breadcrumb__links">
+                            <a href="{% url 'index' %}">Home</a>
+                            <a href="{% url 'shop' %}">Shop</a>
+                            <span>Wishlist</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Breadcrumb Section End -->
+
+    <!-- Shopping Cart Section Begin -->
+    <section class="shopping-cart spad">
+        <div class="container">
+            <form method="POST" id="checkout-form" action="{% url 'cart_place_order' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-lg-12">
+                        
+                        <div class="shopping__cart__table">
+                            
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        
+                                        {% comment %} <th>Details</th> {% endcomment %}
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                   {% for item in items %}
+                                    <tr>
+                                        <td class="product__cart__item">
+                                            <div class="product__cart__item__pic">
+                                                <img src="{{ item.inventory.image.url }}" alt="{{ item.inventory.product.name }}"
+                                                style="width: 100px; height: 120px; object-fit: cover;">
+                                            </div>
+                                            <div class="product__cart__item__text">
+                                                <h6>{{ item.inventory.product.name }}</h6>
+
+                                                {% if item.offer %}
+                                                    <h5>
+                                                        ₹ {{ item.discounted_price|floatformat:2 }}
+                                                        <span class="text-muted" style="text-decoration: line-through;">
+                                                            ₹ {{ item.inventory.product.price|floatformat:2 }}
+                                                        </span>
+                                                    </h5>
+                                                {% else %}
+                                                    <h5>₹ {{ item.inventory.product.price|floatformat:2 }}</h5>
+                                                {% endif %}
+                                                {% if item.savings > 0 %}
+                                                    <small class="text-success">You save ₹{{ item.savings|floatformat:2 }}</small>
+                                                {% endif %}
+
+                                            </div>
+                                        </td>
+                                        <td class="quantity__item">
+                                            
+                                        </td>
+                                        <td class="cart__price row-total">
+                                            <a href="{% url 'product_view' item.inventory.product.slug %}?color={{ item.inventory.color.id }}"><img src="{% static 'img/icon/eye.png' %}" alt=""></a>
+                                        </td>
+                                        <td class="cart__close">
+                                            <a href="{% url 'wishlist_remove' item.inventory.id %}">
+                                                <i class="fa fa-close"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                   {% endfor %}  
+                                </tbody>
+                            </table>
+                            {% comment %} {% else %}
+                                <p>Your wishlist is empty.</p>
+                            {% endif %} {% endcomment %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 col-sm-6">
+                                <div class="continue__btn">
+                                    <a href="{% url 'shop' %}">Continue Shopping</a>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    
+                </div>
+            </form>
+        </div>
+    </section>
+    <!-- Shopping Cart Section End -->
+
+     <!-- jQuery (must come first) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Bootstrap 4 JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+   
+    
+{% endblock content%}
+
+    
+    

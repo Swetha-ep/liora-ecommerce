@@ -54,7 +54,21 @@
                                             </div>
                                             <div class="product__cart__item__text">
                                                 <h6>{{ item.inventory.product.name }} - {{item.inventory.size}}</h6>
-                                                <h5>₹ {{ item.inventory.product.price }}</h5>
+
+                                                {% if item.discounted_price != item.inventory.product.price %}
+                                                    <h5>
+                                                        ₹ {{ item.discounted_price|floatformat:2 }}
+                                                        <span class="text-muted" style="text-decoration: line-through;">
+                                                            ₹ {{ item.inventory.product.price|floatformat:2 }}
+                                                        </span>
+                                                    </h5>
+                                                {% else %}
+                                                    <h5>₹ {{ item.inventory.product.price|floatformat:2 }}</h5>
+                                                {% endif %}
+                                                {% if item.savings > 0 %}
+                                                    <small class="text-success">You save ₹{{ item.savings|floatformat:2 }}</small>
+                                                {% endif %}
+
                                             </div>
                                         </td>
                                         <td class="quantity__item">

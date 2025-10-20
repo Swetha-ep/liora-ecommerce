@@ -68,6 +68,40 @@
     </section>
     <!-- Banner Section End -->
 
+     <!-- Categories Section Begin -->
+    <section class="categories spad">
+        <div class="container">
+            {% for item in offers%}
+            <div class="row mt-5">
+                <div class="col-lg-3">
+                    <div class="categories__text">
+                        <h2> <br /> <span>{{item.category.name}}</span> <br /> </h2>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="categories__hot__deal">
+                        <img src="{{item.image.url}}" alt="">
+                        <div class="hot__deal__sticker">
+                            <span>sale of</span>
+                            <h5>{{item.name}}</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 offset-lg-1">
+                    <div class="categories__deal__countdown">
+                        <span>Deal Of The Day</span>
+                        <h2>{{item.description}}</h2>
+                        
+                        <a href="#" class="primary-btn">Shop now</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    <br>
+    <!-- Categories Section End -->
+
     <!-- Product Section Begin -->
     <section class="product spad">
         <div class="container">
@@ -360,4 +394,5 @@
         </div>
     </section>
     <!-- Product Section End -->
+    
 {% endblock content %}
