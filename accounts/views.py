@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
@@ -12,6 +12,7 @@ from django.contrib import messages
 from accounts.models import Address
 from .forms import AddressForm
 from django.urls import reverse
+from orders.models import Wallet, WalletTransaction
 
 # Create your views here.
 
@@ -78,9 +79,13 @@ def logout_view(request):
 def profile(request):
     addresses = Address.objects.filter(user=request.user)
     form = AddressForm()
+    wallet= get_object_or_404(Wallet, user=request.user)
+    transactions = wallet.transactions.order_by('-created_at')[:3]
     context = {
         'addresses' : addresses,
-        'form' : form
+        'form' : form,
+        'wallet': wallet,
+        'transactions': transactions,
     }
     return render(request,'accounts/profile.html', context)
 
@@ -155,3 +160,4 @@ def reset_password(request,token):
         return redirect("auth_login")
     
     return render(request, "accounts/reset_password.html", {'token':token})
+

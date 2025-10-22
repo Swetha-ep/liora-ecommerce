@@ -102,7 +102,9 @@
                         <ul>
                             <li class="{% active_class 'index' %}"><a href="{% url 'index' %}">Home</a></li>
                             <li class="{% active_class 'shop' %}"><a href="{% url 'shop' %}">Shop</a></li>
-                            <li><a href="#">Pages</a></li>
+                            {% if user.is_authenticated %}
+                                <li class="{% active_class 'your_orders' %}"><a href="{% url 'your_orders' %}">Orders</a></li>
+                            {% endif %}
                             <li><a href="./blog.html">Blog</a></li>
                             <li><a href="./contact.html">Contacts</a></li>
                         </ul>
@@ -112,8 +114,10 @@
                     <div class="header__nav__option">
                         
                         <a href="{% url 'wishlist' %}"><img src="{% static 'img/icon/heart.png' %}" alt=""></a>
-                        <a href="{% url 'cart' %}"><img src="{% static 'img/icon/cart.png' %}" alt=""> <span>0</span></a>
-                        <div class="price">$0.00</div>
+                        <a href="{% url 'cart' %}"><img src="{% static 'img/icon/cart.png' %}" alt=""> 
+                            <span>{{ cart_count }}</span>
+                        </a>
+                        <div class="price">₹{{ cart_total|floatformat:2 }}</div>
                     </div>
                 </div>
             </div>

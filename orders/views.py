@@ -6,13 +6,14 @@ from products.models import Inventory
 from accounts.models import Address
 from accounts.forms import AddressForm
 from django.contrib import messages
-from .models import Order, Cart, CartItem, OrderItem
+from .models import Order, Cart, CartItem, OrderItem, Wallet, WalletTransaction
 import razorpay
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from .helpers import send_order_email, apply_coupon
 from products.helper import get_product_offer_details
+
 
 def buy_now(request):
     addresses = Address.objects.filter(user=request.user)
@@ -403,3 +404,35 @@ def apply_coupon_ajax(request):
         })
     except ValueError as e:
         return JsonResponse({'success' : False, 'message': str(e)})
+    
+
+    
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if order.order_status in ['Shipped', 'Delivered']:
+        messages.warning(request, "You can't cancel this order.")
+        return redirect('your_orders')
+
+    if order.order_status == 'Cancelled':
+        messages.info(request, "This order is already cancelled.")
+        return redirect('your_orders')
+
+    order.order_status = 'Cancelled'
+    order.save()
+
+    if order.is_paid and order.payment_method == 'RZP':
+        wallet, _ = Wallet.objects.get_or_create(user=request.user)
+        already_refunded = wallet.transactions.filter(
+            description=f"Refund for Order #{order.id}"
+        ).exists()
+
+        if not already_refunded:
+            wallet.deposit(Decimal(order.total_price), description=f"Refund for Order #{order.id}")
+            messages.success(request, f"Order #{order.id} cancelled and amount refunded to wallet.")
+        else:
+            messages.info(request, "Order cancelled. Refund was already processed earlier.")
+    else:
+        messages.success(request, f"Order #{order.id} cancelled successfully.")
+
+    return redirect('your_orders')

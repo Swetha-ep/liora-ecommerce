@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 import datetime
 from django.utils import timezone
-
+from django.contrib import messages
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.units import inch
@@ -336,8 +336,12 @@ def order_status_update(request, order_id):
 
     if request.method == 'POST':
         new_status = request.POST.get('order_status')
+        if new_status == 'Cancelled':
+            messages.warning(request, "You cannot manually cancel an order from the admin panel.")
+            return redirect(request.META.get("HTTP_REFERER", "order_list"))
         order.order_status = new_status
         order.save()
+        messages.success(request, f"Order status updated to {new_status}.")
     return redirect(request.META.get("HTTP_REFERER", "order_list"))
 
 

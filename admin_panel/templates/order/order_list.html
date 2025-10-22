@@ -74,9 +74,11 @@
                                                 {% elif order.order_status == "Cancelled" %}
                                                     <span class="badge badge-secondary">Cancelled</span>
                                                 {% endif %}
-                                                <button type="button" class="btn btn-sm btn-link p-0" onclick="editStatus({{ order.id }})">
-                                                    <i class="fa fa-edit"></i>
-                                                </button>
+                                                {% if order.order_status != "Cancelled" %}
+                                                    <button type="button" class="btn btn-sm btn-link p-0" onclick="editStatus({{ order.id }})">
+                                                        <i class="fa fa-edit"></i>
+                                                    </button>
+                                                {% endif %}
                                             </div>
 
                                             <div id="status-edit-{{ order.id }}" style="display: none;">
@@ -87,7 +89,6 @@
                                                         <option value="Pending" {% if order.order_status == "Pending" %}selected{% endif %}>Pending</option>
                                                         <option value="Shipped" {% if order.order_status == "Shipped" %}selected{% endif %}>Shipped</option>
                                                         <option value="Delivered" {% if order.order_status == "Delivered" %}selected{% endif %}>Delivered</option>
-                                                        <option value="Cancelled" {% if order.order_status == "Cancelled" %}selected{% endif %}>Cancelled</option>
                                                     </select>
                                                 </form>
                                             </div>

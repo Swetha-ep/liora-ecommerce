@@ -59,10 +59,39 @@
   
                         </div>
 
-                        
-
-
+                   
                         <div class="col-lg-4 col-md-6">
+
+                            <!-- 🪙 Wallet Section Start -->
+    <div class="checkout__order mb-4">
+        <h4 class="mb-3">💰 My Wallet</h4>
+        <div class="border rounded p-3 mb-3" style="background-color: #f9f9f9;">
+            <div class="d-flex justify-content-between align-items-center">
+                <strong>Current Balance:</strong>
+                <span class="text-success font-weight-bold">₹{{ wallet.balance }}</span>
+            </div>
+        </div>
+
+        {% if transactions %}
+            <h6 class="mb-2">Recent Transactions</h6>
+            <ul class="list-group list-group-flush mb-3">
+                {% for tx in transactions %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <small>{{ tx.description }}</small>
+                        {% if tx.amount > 0 %}
+                            <small class="text-success">+ ₹{{ tx.amount }}</small>
+                        {% else %}
+                            <small class="text-danger">₹{{ tx.amount }}</small>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted mb-0">No transactions yet.</p>
+        {% endif %}
+    </div>
+    <!-- 🪙 Wallet Section End -->
+
                             <div class="checkout__order">
                             {% for addr in addresses %}
                                 

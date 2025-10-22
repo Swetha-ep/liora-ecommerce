@@ -8,11 +8,11 @@
         <table class="table table-bordered table-hover">
             <thead class="thead-dark">
                 <tr>
-                    <th>#</th>
                     <th>Product</th>
                     <th>Quantity</th>
                     <th>Total Price</th>
                     <th>Status</th>
+                    <th>Action</th>
                     <th>Payment Method</th>
                     <th>Order Date</th>
                 </tr>
@@ -21,20 +21,28 @@
                 {% for order in orders %}
                     {% for item in order.order.all %}
                     <tr>
-                        <td>{{ forloop.parentloop.counter }}.{{ forloop.counter }}</td>
                         <td>{{ item.inventory.product.name }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>₹ {{ order.total_price }}</td>
                         <td>
                             {% if order.order_status == "Pending" %}
-                                <span class="badge badge-warning">Pending</span>
+                            <span class="badge badge-warning">Pending</span>
                             {% elif order.order_status == "Shipped" %}
-                                <span class="badge badge-info">Shipped</span>
+                            <span class="badge badge-info">Shipped</span>
                             {% elif order.order_status == "Delivered" %}
-                                <span class="badge badge-success">Delivered</span>
+                            <span class="badge badge-success">Delivered</span>
                             {% else %}
-                                <span class="badge badge-secondary">{{ order.order_status }}</span>
+                            <span class="badge badge-secondary">{{ order.order_status }}</span>
                             {% endif %}
+                        </td>
+                        <td>
+                            {% if order.order_status not in "Cancelled Shipped Delivered" %}
+                                <form action="{% url 'cancel_order' order.id %}" method="post">
+                                {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                                </form>
+                            {% endif %}
+
                         </td>
                         <td>{{ order.payment_method }}</td>
                         <td>{{ order.created_at|date:"d M Y, h:i A" }}</td>

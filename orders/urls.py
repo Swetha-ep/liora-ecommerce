@@ -19,4 +19,7 @@ urlpatterns = [
 
     path('apply-coupon/', views.apply_coupon_ajax, name='apply_coupon_ajax'),
     path('apply-coupon-buy-now/', views.apply_coupon_buy_now_ajax, name='apply_coupon_buy_now_ajax'),
+
+    path('cancel/<int:order_id>/', views.cancel_order, name='cancel_order'),
+
 ]
