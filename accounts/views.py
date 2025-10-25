@@ -12,10 +12,11 @@ from django.contrib import messages
 from accounts.models import Address
 from .forms import AddressForm
 from django.urls import reverse
-from orders.models import Wallet, WalletTransaction
+from orders.models import Wallet
+from django.contrib.auth.decorators import login_required
 
-# Create your views here.
-
+# ----------------------------------authentication views--------------------------
+# login view
 def auth_page(request):
     if request.method == 'POST':
         if 'signup_submit' in request.POST:
@@ -44,7 +45,11 @@ def auth_page(request):
                 user = User.objects.create_user(username=username, email=email,password=password1)
                 login(request, user)
                 messages.success(request, "Account created successfully!")
-                return redirect('index')
+
+                if user.is_superuser:
+                    return redirect('dashboard')
+                else:
+                    return redirect('index')
             
         elif 'signin_submit' in request.POST:
             username = request.POST.get('username')
@@ -62,7 +67,11 @@ def auth_page(request):
             if user is not None:
                 login(request, user)
                 messages.success(request, f"Welcome back, {user.username}!")
-                return redirect('index')
+
+                if user.is_superuser:
+                    return redirect('dashboard')
+                else:
+                    return redirect('index')
             
             else:
                 messages.error(request, "Login failed. Check your credentials.")
@@ -70,12 +79,16 @@ def auth_page(request):
             
     return render(request, 'accounts/login.html')
 
-
+# logout view
 def logout_view(request):
     logout(request)
     return redirect('auth_login')
 
+# ----------------------------------end of authentication views--------------------
 
+# ----------------------------------profile views----------------------------------
+# profile view
+@login_required(login_url='auth_login')
 def profile(request):
     addresses = Address.objects.filter(user=request.user)
     form = AddressForm()
@@ -90,6 +103,8 @@ def profile(request):
     return render(request,'accounts/profile.html', context)
 
 
+# address view
+@login_required(login_url='auth_login')
 def add_address(request):
     if request.method == 'POST' and request.user.is_authenticated:
         form = AddressForm(request.POST)
@@ -102,9 +117,10 @@ def add_address(request):
     else:
         messages.error(request, 'Something went error. Try again')
     return render(request,'accounts/profile.html')
+# ---------------------------------end of profile views----------------------------
 
-
-
+# -------------------------------forgot password views----------------------------
+# forgot password view
 def forgot_password(request):
     if request.method=='POST':
         email = request.POST.get('email')
@@ -132,6 +148,7 @@ def forgot_password(request):
     return render(request, "accounts/forgot_password.html")
 
 
+# reset password view
 def reset_password(request,token):
     try:
         reset_token = PasswordResetToken.objects.get(token=token)
@@ -161,3 +178,4 @@ def reset_password(request,token):
     
     return render(request, "accounts/reset_password.html", {'token':token})
 
+# --------------------------------end of forgot password views--------------------

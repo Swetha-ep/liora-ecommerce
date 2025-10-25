@@ -4,9 +4,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from products.models import Inventory
 from accounts.models import Address
-from accounts.forms import AddressForm
 from django.contrib import messages
-from .models import Order, Cart, CartItem, OrderItem, Wallet, WalletTransaction
+from .models import Order, Cart, CartItem, OrderItem, Wallet
 import razorpay
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
@@ -15,6 +14,9 @@ from .helpers import send_order_email, apply_coupon
 from products.helper import get_product_offer_details
 
 
+# ----------------------------------buy now views--------------------------------------
+# buy now view
+@login_required(login_url='auth_login')
 def buy_now(request):
     addresses = Address.objects.filter(user=request.user)
     
@@ -59,6 +61,8 @@ def buy_now(request):
         return redirect('index')
     
 
+# apply coupon view
+@login_required(login_url='auth_login')
 def apply_coupon_buy_now_ajax(request):
     if request.method != "POST":
         return JsonResponse({'success': False, 'message': 'Invalid request.'})
@@ -89,6 +93,8 @@ def apply_coupon_buy_now_ajax(request):
         return JsonResponse({'success': False, 'message': str(e)})
     
 
+# place order view
+@login_required(login_url='auth_login')
 def place_order(request):
     if request.method == 'POST':
         inventory_id = request.POST.get('inventory_id')
@@ -110,7 +116,6 @@ def place_order(request):
         price_to_use = offer_data['discounted_price'] or inventory.product.price
         subtotal = price_to_use * quantity
 
-       
         if coupon_code:
             try:
                 final_total, discount, coupon = apply_coupon(request.user, subtotal, coupon_code)
@@ -153,8 +158,11 @@ def place_order(request):
     messages.error(request, "Invalid request.")
     return redirect('index')  
 
+# ----------------------------------end of buy now views--------------------------------
 
 
+# ----------------------------------payment views---------------------------------------
+# verify payment view
 @csrf_exempt
 def verify_payment(request, order_id):
     if request.method == "POST":
@@ -181,7 +189,8 @@ def verify_payment(request, order_id):
     return JsonResponse({'status': 'invalid'}, status=400)
 
     
-
+# payment view
+@login_required(login_url='auth_login')
 def pay(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
    
@@ -224,17 +233,11 @@ def pay(request, order_id):
 
     return render(request, 'orders/payment.html', {'order': order, 'auto_open_razorpay': False})
 
+# --------------------------------end of payment views----------------------------------
 
-
-def your_orders(request):
-    order = Order.objects.filter(user=request.user).order_by('-created_at')
-    context = {
-        'orders' : order,
-    }
-    return render(request, 'orders/your_orders.html', context)
-
-
-@login_required
+# -----------------------------------cart views--------------------------------------------------------------
+# add to cart view
+@login_required(login_url='auth_login')
 def add_to_cart(request):
     if request.method=='POST':
         product = request.POST.get('product_id')
@@ -267,6 +270,8 @@ def add_to_cart(request):
     return redirect('cart')
 
 
+# cart view
+@login_required(login_url='auth_login')
 def cart(request):
     addresses = Address.objects.filter(user=request.user)
     cart = (Cart.objects.filter(user=request.user).prefetch_related('items__inventory__product').first())
@@ -286,6 +291,8 @@ def cart(request):
     return render(request, 'orders/cart.html', context)
 
 
+# update cart view
+@login_required(login_url='auth_login')
 def update_cart_quantity(request, item_id):
     if request.method == "POST":
         try:
@@ -317,12 +324,16 @@ def update_cart_quantity(request, item_id):
     return JsonResponse({"success": False, "error": "Invalid request"})
 
 
+# delete cart view
+@login_required(login_url='auth_login')
 def delete_cart_item(request, item_id):
     cart_item = get_object_or_404(CartItem, id=item_id, cart__user=request.user)
     cart_item.delete()
     return redirect('cart')
 
 
+# cart place order view
+@login_required(login_url='auth_login')
 def cart_place_order(request):
     if request.method =='POST':
         cart = get_object_or_404(Cart, user=request.user)
@@ -383,8 +394,10 @@ def cart_place_order(request):
 
         return redirect('razorpay_payment', order_id=order.id)
     return redirect('cart')
- 
 
+
+# apply coupon view
+@login_required(login_url='auth_login')
 def apply_coupon_ajax(request):
     cart = get_object_or_404(Cart, user=request.user)
     cart_items = CartItem.objects.filter(cart=cart)
@@ -404,9 +417,22 @@ def apply_coupon_ajax(request):
         })
     except ValueError as e:
         return JsonResponse({'success' : False, 'message': str(e)})
-    
 
-    
+# -----------------------------------end of cart views-----------------------------------------------------
+
+# -----------------------------------order views----------------------------------------------------------
+# orders view
+@login_required(login_url='auth_login')
+def your_orders(request):
+    order = Order.objects.filter(user=request.user).order_by('-created_at')
+    context = {
+        'orders' : order,
+    }
+    return render(request, 'orders/your_orders.html', context)
+
+
+# cancel order view
+@login_required(login_url='auth_login')
 def cancel_order(request, order_id):
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
@@ -436,3 +462,5 @@ def cancel_order(request, order_id):
         messages.success(request, f"Order #{order.id} cancelled successfully.")
 
     return redirect('your_orders')
+
+# ----------------------------------end of order views----------------------------------------------------

@@ -1,20 +1,39 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.paginator import Paginator
 from .models import *
+from .forms import ContactForm
+from django.core.mail import send_mail, BadHeaderError
 from admin_panel.models import Banner
 from .helper import get_product_offer_details
 from django.contrib import messages
+from django.conf import settings
+import random
+from django.contrib.auth.decorators import login_required
 
-# Create your views here.
+
+# home page view
 def index(request):
     banners = Banner.objects.filter(is_active=True)
     offers = Offer.objects.filter(active=True)
+    all_products = list(Product.objects.all())
+    best_sellers = random.sample(all_products, min(len(all_products), 4))
+
     context = {
         'banners' : banners,
         'offers' : offers,
+        'best_sellers': best_sellers,
     }
     return render(request,'index.html',context)
 
+
+# category page view
+def shop(request):
+    categories = Categories.objects.all()
+    return render(request,'shop.html',{'categories' : categories})
+
+
+# ------------------------------------------product views----------------------------------
+# products page view
 def products(request, slug=None):
     category = None
     if slug == 'all' or slug is None:
@@ -61,12 +80,7 @@ def products(request, slug=None):
     }
     return render(request,'products.html', context)
 
-
-def shop(request):
-    categories = Categories.objects.all()
-    return render(request,'shop.html',{'categories' : categories})
-
-
+# product detail view
 def product_view(request, slug):
     product = get_object_or_404(Product, slug=slug)
     colors = Color.objects.filter(inventory_color__product = product).distinct()
@@ -78,6 +92,9 @@ def product_view(request, slug):
     offer = offer_data['offer']
     savings = offer_data['savings']
 
+    all_products = list(Product.objects.filter(category=product.category))
+    best_sellers = random.sample(all_products, min(len(all_products), 4))
+
     selected_color_id = request.GET.get('color')
     inventory = None
     if selected_color_id:
@@ -87,7 +104,7 @@ def product_view(request, slug):
         selected_color = colors.first()
 
     wishlisted = False
-    if inventory:
+    if request.user.is_authenticated and inventory:
         wishlisted = Wishlist.objects.filter(user=request.user, inventory=inventory).exists()
     
 
@@ -105,10 +122,15 @@ def product_view(request, slug):
         'offer': offer,
         'savings' : savings,
         'wishlisted': wishlisted,
+        'best_sellers' : best_sellers,
     }
     return render(request, 'products/product_details.html', context)
 
+# -----------------------------------------end of product views----------------------------
 
+# ----------------------------------------wishlist views----------------------------------
+# add to wishlist view 
+@login_required(login_url='auth_login')
 def add_to_wishlist(request):
     if request.method == 'POST':
         product_id = request.POST.get('product_id')
@@ -137,6 +159,8 @@ def add_to_wishlist(request):
         return redirect('product_view', slug=inventory.product.slug)
 
 
+# wishlist view
+@login_required(login_url='auth_login')
 def wishlist(request):
     items = Wishlist.objects.filter(user=request.user).select_related('inventory')
     for item in items:
@@ -151,8 +175,47 @@ def wishlist(request):
     return render(request, 'products/wishlist.html',context)
 
 
+# remove from wishlist view
+@login_required(login_url='auth_login')
 def wishlist_remove(request, inventory_id):
     inventory = get_object_or_404(Inventory, id=inventory_id)
     Wishlist.objects.filter(user=request.user, inventory=inventory).delete()
     messages.success(request, 'Product removed from your wishlist')
     return redirect('wishlist')
+
+# ---------------------------------------end of wishlist views--------------------------
+
+# blog view
+def blog(request):
+    return render(request, 'blog.html')
+
+
+# contact view
+def contact(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            message = form.cleaned_data['message']
+            
+            subject = f"New Message from {name} via Liora Contact Form"
+            full_message = f'Message from {name} ({email}):\n\n{message}'
+
+            try:
+                send_mail(
+                    subject=subject,
+                    message=full_message,
+                    from_email=settings.DEFAULT_FROM_EMAIL,  
+                    recipient_list=[settings.EMAIL_HOST_USER],
+                    fail_silently=False,
+                )
+                messages.success(request, "Your message has been sent successfully 💌")
+                return redirect('contact')
+            except BadHeaderError:
+                messages.error(request, "Invalid header found.")
+                return redirect('contact')
+
+    else:
+        form = ContactForm()
+    return render(request, 'contact.html',{'form': form})

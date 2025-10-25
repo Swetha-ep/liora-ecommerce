@@ -11,25 +11,36 @@ from django.db.models import Count, Sum
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 import datetime
-from django.utils import timezone
 from django.contrib import messages
+from django.utils.decorators import method_decorator
+from django.core.paginator import Paginator
+
+from django.contrib.auth.decorators import user_passes_test
+from functools import wraps
+
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
-from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.units import cm
-from reportlab.pdfgen import canvas
+
+
+def superuser_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('auth_login')
+        if not request.user.is_superuser:
+            return redirect('index')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
+
 
 # dashboard view
+@superuser_required
 def dashboard(request):
-    # Total users
     total_users = User.objects.count()
-
-    # Total orders
     total_orders = Order.objects.count()
 
-    # Total sales amount
     total_sales = Order.objects.aggregate(total=Sum('total_price'))['total'] or 0
     data = (
         Order.objects.annotate(month=TruncMonth('created_at'))
@@ -146,12 +157,14 @@ def sales_report_pdf(request):
 #--->- Class Based Views -<---
 
 # category listing view
+@method_decorator(superuser_required, name='dispatch')
 class CategoryList(ListView):
     model = Categories
     template_name = 'items/category_list.html'
     context_object_name = 'categories'
 
 # add category view
+@method_decorator(superuser_required, name='dispatch')
 class CategoryCreate(CreateView):
     model = Categories
     success_url = reverse_lazy('category_list')
@@ -159,6 +172,7 @@ class CategoryCreate(CreateView):
     form_class = CategoryForm
 
 # edit category view
+@method_decorator(superuser_required, name='dispatch')
 class CategoryUpdate(UpdateView):
     model = Categories
     success_url = reverse_lazy('category_list')
@@ -166,6 +180,7 @@ class CategoryUpdate(UpdateView):
     form_class = CategoryForm
 
 # delete category view
+@method_decorator(superuser_required, name='dispatch')
 class CategoryDelete(DeleteView):
     model = Categories
     context_object_name = 'category'
@@ -175,14 +190,21 @@ class CategoryDelete(DeleteView):
 # --------------------------product views-----------------------------
 
 # product listing view
+@superuser_required
 def products_list(request):
     products = Product.objects.all()
+
+    page_number = request.GET.get('page',1)
+    paginator = Paginator(products, 10)
+    page_obj = paginator.get_page(page_number)
     context = {
-        'products' : products
+        'products' : products,
+        'page_obj' : page_obj,
     }
     return render(request, 'items/products_list.html', context)
 
 # add product view
+@superuser_required
 def add_products(request):
     heading = "Add Product"
     if request.method == 'POST':
@@ -196,6 +218,7 @@ def add_products(request):
                   {'form':form, 'heading': heading})
 
 # edit product view
+@superuser_required
 def edit_product(request, pk):
     heading = "Edit Product"
     product = get_object_or_404(Product, id = pk)
@@ -210,6 +233,7 @@ def edit_product(request, pk):
                   {'form':form, 'heading': heading})
 
 # delete product view
+@superuser_required
 def delete_product(request, pk):
     product = get_object_or_404(Product,id=pk)
     product.delete()
@@ -218,6 +242,7 @@ def delete_product(request, pk):
 
 # --------------------------size views-----------------------------
 # size listing and adding view 
+@superuser_required
 def add_size(request):
     sizes = Size.objects.all()
     form = SizeForm()
@@ -237,6 +262,7 @@ def add_size(request):
     return render(request, 'inventory/property_list.html', context)
 
 # size delete view
+@method_decorator(superuser_required, name='dispatch')
 class SizeDelete(DeleteView):
     model = Size
     success_url =reverse_lazy('size_list')
@@ -244,6 +270,7 @@ class SizeDelete(DeleteView):
 
 # --------------------------color views-----------------------------
 # color listing and adding view
+@superuser_required
 def color_list(request):
     colors = Color.objects.all()
     form = ColorForm()
@@ -262,6 +289,7 @@ def color_list(request):
 
 
 # color delete view
+@method_decorator(superuser_required, name='dispatch')
 class ColorDelete(DeleteView):
     model = Color
     success_url =reverse_lazy('color_list')
@@ -269,6 +297,7 @@ class ColorDelete(DeleteView):
 
 # --------------------------inventory views-----------------------------
 #  add stock view
+@superuser_required
 def add_stock(request):
     if request.method == 'POST':
         form = StockForm(request.POST, request.FILES)
@@ -281,6 +310,7 @@ def add_stock(request):
 
 
 # edit stock view
+@superuser_required
 def edit_stock(request, pk):
     heading = 'Edit Stock'
     inventory = get_object_or_404(Inventory, id=pk)
@@ -297,6 +327,7 @@ def edit_stock(request, pk):
 
 
 # stock list view
+@superuser_required
 def stock_list(request):
     stock = Inventory.objects.all()
     category = Categories.objects.all()
@@ -308,15 +339,21 @@ def stock_list(request):
         stock = stock.filter(product__category_id=category_id)
         selected_category = Categories.objects.filter(id=category_id).first()
 
+    paginator = Paginator(stock, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'items' : stock,
+        'items' : page_obj,
         'categories' : category,
         'selected_category' : selected_category,
+        'page_obj' : page_obj,
     }
     return render(request, 'inventory/stock_list.html', context)
 
 
 # stock delete view
+@superuser_required
 def stock_delete(request, pk):
     stock = get_object_or_404(Inventory, id=pk)
     stock.delete()
@@ -325,12 +362,14 @@ def stock_delete(request, pk):
 
 # --------------------------order views-----------------------------
 #order list
+@superuser_required
 def order_list(request):
     order = Order.objects.all().order_by('-created_at')
     return render(request, 'order/order_list.html', {'order': order})
 
 
 # order status update
+@superuser_required
 def order_status_update(request, order_id):
     order = get_object_or_404(Order,id=order_id)
 
@@ -347,12 +386,14 @@ def order_status_update(request, order_id):
 
 # --------------------------coupon views-----------------------------
 # coupon list
+@superuser_required
 def coupon_list(request):
     coupons = Coupon.objects.all()
     return render(request, 'coupon/coupon_list.html', {'coupons' : coupons})
 
 
 # add coupon
+@superuser_required
 def add_coupon(request):
     if request.method == 'POST':
         form = CouponForm(request.POST)
@@ -365,6 +406,7 @@ def add_coupon(request):
 
 
 # edit coupon
+@superuser_required
 def edit_coupon(request, pk):
     coupon = get_object_or_404(Coupon, id=pk)
     if request.method == 'POST':
@@ -378,6 +420,7 @@ def edit_coupon(request, pk):
 
 
 # delete coupon
+@superuser_required
 def coupon_delete(request, pk):
     coupon = get_object_or_404(Coupon, id=pk)
     coupon.delete()
@@ -386,6 +429,7 @@ def coupon_delete(request, pk):
 
 # --------------------------banner views-----------------------------
 # add banner
+@superuser_required
 def add_banner(request):
     if request.method == 'POST':
         form = BannerForm(request.POST, request.FILES)
@@ -398,6 +442,7 @@ def add_banner(request):
 
 
 # edit banner
+@superuser_required
 def edit_banner(request,pk):
     banner = get_object_or_404(Banner, id=pk)
     if request.method=='POST':
@@ -411,12 +456,14 @@ def edit_banner(request,pk):
 
 
 # banner list
+@superuser_required
 def banner_list(request):
     banners = Banner.objects.all()
     return render(request, 'banner/banner_list.html',{'banners':banners})
 
 
 # delete banner
+@superuser_required
 def banner_delete(request,pk):
     banner = get_object_or_404(Banner, id=pk)
     banner.delete()
@@ -428,6 +475,7 @@ def banner_delete(request,pk):
 #--->- Class Based Views -<---
 
 # offer list
+@method_decorator(superuser_required, name='dispatch')
 class OfferList(ListView):
     model = Offer
     template_name = 'offer/offer_list.html'
@@ -435,6 +483,7 @@ class OfferList(ListView):
 
 
 # add offer
+@method_decorator(superuser_required, name='dispatch')
 class OfferCreate(CreateView):
     model = Offer
     success_url = reverse_lazy('offer_list')
@@ -443,6 +492,7 @@ class OfferCreate(CreateView):
 
 
 # edit offer
+@method_decorator(superuser_required, name='dispatch')
 class OfferUpdate(UpdateView):
     model = Offer
     success_url = reverse_lazy('offer_list')
@@ -451,6 +501,7 @@ class OfferUpdate(UpdateView):
 
 
 # delete offer
+@method_decorator(superuser_required, name='dispatch')
 class OfferDelete(DeleteView):
     model = Offer
     context_object_name = 'offer'

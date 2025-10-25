@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}L I O R A | Blog{% endblock %}
+
+{% block content %}
+
+<!-- Breadcrumb Section -->
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Liora Blog</h4>
+                    <div class="breadcrumb__links">
+                        <a href="{% url 'index' %}">Home</a>
+                        <span>Blog</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Blog Section -->
+<section class="blog spad">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 col-sm-6">
+                    <div class="blog__item">
+                        <div class="blog__item__pic set-bg" data-setbg="{% static 'img/blog/blazer-blog.jpg' %}"></div>
+                        <div class="blog__item__text">
+                            <span><img src="img/icon/calendar.png" alt=""> Oct 10, 2025</span>
+                            <h5>Mastering the Art of Blazer Styling</h5>
+                            <p>From business meetings to brunch dates — blazers are your ultimate fashion weapon. Learn how to style them for every mood and moment...</p>
+                            <a >Read More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6">
+                    <div class="blog__item">
+                        <div class="blog__item__pic set-bg" data-setbg="{% static 'img/blog/shirt-blog.jpg' %}"></div>
+                        <div class="blog__item__text">
+                            <span><img src="img/icon/calendar.png" alt=""> Oct 05, 2025</span>
+                            <h5>The Shirt Edit: From Casual Cool to Effortless Chic</h5>
+                            <p>Discover how to elevate your look with shirts that define modern style — crisp whites, relaxed linens, and patterned must-haves...</p>
+                            <a>Read More</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6 col-sm-6">
+                    <div class="blog__item">
+                        <div class="blog__item__pic set-bg" data-setbg="{% static 'img/blog/trouser-blog.jpg' %}"></div>
+                        <div class="blog__item__text">
+                            <span><img src="img/icon/calendar.png" alt=""> Sep 28, 2025</span>
+                            <h5>The Perfect Fit: A Trouser Guide for Every Body Type</h5>
+                            <p>Finding the right pair of trousers can redefine your silhouette. Explore tailored fits, relaxed cuts, and the magic of minimal styling...</p>
+                            <a>Read More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock content %}
