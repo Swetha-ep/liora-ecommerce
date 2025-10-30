@@ -27,7 +27,10 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+<<<<<<< Updated upstream
 ALLOWED_HOSTS = ['liora.duckdns.org', '35.172.181.108']
+=======
+>>>>>>> Stashed changes
 
 
 # Application definition
