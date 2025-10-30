@@ -276,14 +276,16 @@ def cart(request):
     addresses = Address.objects.filter(user=request.user)
     cart = (Cart.objects.filter(user=request.user).prefetch_related('items__inventory__product').first())
 
-    if cart:
+    if cart and cart.items.exists():
         for item in cart.items.all():
             product = item.inventory.product
             offer_data = get_product_offer_details(product)
             item.discounted_price = offer_data['discounted_price']
             item.savings = offer_data['savings']
             subtotal = item.quantity * item.discounted_price
-
+    else:
+        cart =None
+        
     context = {
         'cart' : cart,
         'addresses' : addresses,

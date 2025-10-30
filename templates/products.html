@@ -102,7 +102,7 @@
                                         <h6>{{item.name}}</h6>
                                         <a href="{% url 'product_view' item.slug %}?color={{item.inventories.first.color.id}}" class="add-cart">View</a>
                                         
-                                        {% if item.discounted_price %}
+                                        {% if item.discounted_price != item.price %}
                                             <h5 class="original-price text-muted mb-1"><del>₹{{ item.price }}</del></h5>
                                             <h5 class="discounted-price text-danger fw-bold mb-2">₹{{ item.discounted_price|floatformat:2 }}</h5>
                                         {% else %}

@@ -91,7 +91,7 @@
                         <span>Deal Of The Day</span>
                         <h2>{{item.description}}</h2>
                         
-                        <a href="#" class="primary-btn">Shop now</a>
+                        <a href="{% url 'products' item.category.slug %}" class="primary-btn">Shop now</a>
                     </div>
                 </div>
             </div>

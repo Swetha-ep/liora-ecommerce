@@ -37,46 +37,54 @@
   </div>
 </div>
 
+
 <script>
+  {% if auto_open_razorpay %}
     var options = {
-        "key": "{{ razorpay_key_id }}",
-        "amount": "{{ amount }}",
-        "currency": "INR",
-        "name": "Liora",
-        "description": "Order Payment",
-        "order_id": "{{ razorpay_order_id }}",
-        
-        "handler": function (response){
-            fetch("{% url 'verify_payment' order.id %}", {
-              method: "POST",
-              headers: {
-                  "Content-Type": "application/json",
-                  "X-CSRFToken": "{{ csrf_token }}"
-              },
-              body: JSON.stringify({
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_signature: response.razorpay_signature
-              })
-          }).then(res => {
-              window.location.href = "{% url 'your_orders' %}";
-          });
-        },
-        "modal": {
-            "ondismiss": function(){
-                alert("Payment cancelled.");
-                window.location.href = "{% url 'shop' %}";
-            }
-        },
-        "theme": {
-            "color": "#3399cc"
+      "key": "{{ razorpay_key_id }}",
+      "amount": "{{ amount }}",
+      "currency": "INR",
+      "name": "Liora",
+      "description": "Order Payment",
+      "order_id": "{{ razorpay_order_id }}",
+
+      "handler": function (response) {
+        fetch("{% url 'verify_payment' order.id %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_signature: response.razorpay_signature
+          })
+        }).then(res => {
+          window.location.href = "{% url 'your_orders' %}";
+        });
+      },
+      "modal": {
+        "ondismiss": function () {
+          alert("Payment cancelled.");
+          window.location.href = "{% url 'shop' %}";
         }
+      },
+      "theme": {
+        "color": "#3399cc"
+      }
     };
     var rzp1 = new Razorpay(options);
+    rzp1.open();  // auto open right away
+  {% else %}
+    // If auto_open_razorpay is false, attach manual click
+    var rzp1;
     document.getElementById('rzp-button1').onclick = function(e){
-        rzp1.open();
-        e.preventDefault();
-    }
+      e.preventDefault();
+      this.form.submit();  // submit form to create Razorpay order first
+    };
+  {% endif %}
 </script>
+
 
 {% endblock content %}

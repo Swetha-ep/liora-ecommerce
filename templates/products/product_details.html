@@ -39,7 +39,7 @@
                                 <span> - 5 Reviews</span>
                             </div>
 
-                            {% if discounted_price %}
+                            {% if discounted_price != product.price %}
                                 <h3>₹ {{discounted_price|floatformat:2 }} <span>₹ {{product.price}}</span></h3>
                                 {% if savings and savings > 0 %}
                                     <p class="text-success fw-semibold">
