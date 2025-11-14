@@ -3,6 +3,7 @@
 Liora is a **full-stack e-commerce platform** built with **Django**, **JavaScript**, and **PostgreSQL**, designed for selling elegant **formal wear** like blazers, shirts, and trousers.  
 It offers a seamless shopping experience with cart, wishlist, coupon, and secure payment features — along with a powerful admin dashboard for store management.
 
+🎬 **Demo Video:** [https://liora.duckdns.org/](https://youtu.be/Hu3-sJNiDIk)  
 🌐 **Live Demo:** [https://liora.duckdns.org/](https://liora.duckdns.org/)  
 💻 **Tech Stack:** HTML, CSS, JavaScript, Bootstrap, Django, ORM, PostgreSQL, AWS, Git
 
